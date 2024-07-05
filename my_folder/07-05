@@ -1,3 +1,80 @@
+
+The issue seems persistent with the smoothing parameter. Let's refine the approach further by ensuring that the smoothing parameter vector is correctly specified for each term and adding more specific handling for the categorical variable.
+
+Here's a more robust version of the R code:
+
+```R
+library(mgcv)
+library(caret)
+library(dplyr)
+
+# Example dataset
+set.seed(123)
+insurance_data <- data.frame(
+  claim_amount = rnorm(1000, mean = 1000, sd = 300),
+  age_of_driver = rnorm(1000, mean = 45, sd = 10),
+  vehicle_age = rnorm(1000, mean = 5, sd = 2),
+  policy_duration = rnorm(1000, mean = 3, sd = 1),
+  vehicle_type = factor(sample(c('sedan', 'suv', 'truck'), 1000, replace = TRUE))
+)
+
+# Split the data into training and testing sets
+set.seed(123)
+trainIndex <- createDataPartition(insurance_data$claim_amount, p = 0.8, list = FALSE)
+trainData <- insurance_data[trainIndex, ]
+testData <- insurance_data[-trainIndex, ]
+
+# Define a function for fitting a GAM model
+fit_gam <- function(trainData, n_splines, lam) {
+  gam(claim_amount ~ s(age_of_driver, k = n_splines, sp = lam) +
+                    s(vehicle_age, k = n_splines, sp = lam) +
+                    s(policy_duration, k = n_splines, sp = lam) +
+                    vehicle_type, data = trainData, select = TRUE)
+}
+
+# Define the hyperparameters
+tune_grid <- expand.grid(
+  n_splines = c(10, 20, 30),
+  lam = c(0.1, 1, 10)
+)
+
+# Custom RMSE function
+rmse <- function(model, testData) {
+  preds <- predict(model, newdata = testData)
+  sqrt(mean((testData$claim_amount - preds)^2))
+}
+
+# Hyperparameter tuning
+results <- tune_grid %>%
+  rowwise() %>%
+  mutate(RMSE = {
+    model <- fit_gam(trainData, n_splines, lam)
+    rmse(model, testData)
+  }) %>%
+  arrange(RMSE)
+
+best_params <- results[1, ]
+
+# Best model
+best_model <- fit_gam(trainData, best_params$n_splines, best_params$lam)
+
+# Predictions and evaluation
+preds <- predict(best_model, newdata = testData)
+rmse_value <- sqrt(mean((testData$claim_amount - preds)^2))
+
+print(paste("Best Parameters: n_splines =", best_params$n_splines, ", lam =", best_params$lam))
+print(paste("RMSE:", rmse_value))
+```
+
+Changes made:
+1. Each smooth term now has its own `sp` parameter within the `s()` function.
+2. Removed `rep()` for `lam` to directly use the `lam` parameter in each `s()` function call.
+3. Simplified and clarified the code for better readability and correctness.
+
+Please try running this updated code and let me know if the issue persists.
+
+
+
 It looks like the warning about the smoothing parameter vector being too short is still occurring. Let's address this by ensuring the `sp` parameter is correctly specified for each smoothing term and consider simplifying the model fitting process.
 
 Here's an updated approach:
