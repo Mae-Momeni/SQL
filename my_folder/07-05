@@ -1,3 +1,102 @@
+
+To help you better, I'll rewrite the code to automate the extraction of numbers from the first table and use them in the final calculations without manual intervention. 
+
+Here's how you can modify your code to make the process automatic:
+
+### Complete Code with Automation
+
+```r
+# Load necessary library
+library(dplyr)
+
+# Assume partial_paid_all_2 is your data frame
+
+# Step 1: Initial Filtering and Calculate n
+filtered_data <- partial_paid_all_2 %>%
+  filter(bsp_legal_exp == 1)
+
+# Calculate n from the filtered data
+initial_n <- nrow(filtered_data)
+
+# Step 2: Apply Second Filtering
+filtered_data <- filtered_data %>%
+  filter(columnA != 1)
+
+# Step 3: Group and Perform Calculations Using Initial n
+average_impact <- filtered_data %>%
+  group_by(bsp_legal_cc, bsp_prov) %>%
+  summarize(
+    old_pred = sum(old_pred, na.rm = TRUE),
+    new_pred = sum(new_pred, na.rm = TRUE),
+    total_inc = sum(total_inc, na.rm = TRUE),
+    total_paid = sum(total_paid, na.rm = TRUE)
+  ) %>%
+  mutate(
+    initial_n = initial_n,
+    n_60 = 0.6 * initial_n,
+    old_pred_60 = old_pred * 0.6,
+    new_pred_60 = new_pred * 0.6,
+    total_inc_60 = total_inc * 0.6,
+    total_paid_60 = total_paid * 0.6
+  ) %>%
+  ungroup() %>%
+  select(
+    bsp_legal_cc, bsp_prov, initial_n, n_60,
+    old_pred, new_pred, total_inc, total_paid,
+    old_pred_60, new_pred_60, total_inc_60, total_paid_60
+  )
+
+# Print the result
+print(average_impact)
+
+# Step 4: Automate Further Calculations
+# Example: Further summarizations or manipulations using the results from `average_impact`
+
+# Calculate additional metrics based on the summarized data
+final_results <- average_impact %>%
+  summarize(
+    total_old_pred = sum(old_pred, na.rm = TRUE),
+    total_new_pred = sum(new_pred, na.rm = TRUE),
+    total_inc_sum = sum(total_inc, na.rm = TRUE),
+    total_paid_sum = sum(total_paid, na.rm = TRUE),
+    total_old_pred_60 = sum(old_pred_60, na.rm = TRUE),
+    total_new_pred_60 = sum(new_pred_60, na.rm = TRUE),
+    total_inc_60_sum = sum(total_inc_60, na.rm = TRUE),
+    total_paid_60_sum = sum(total_paid_60, na.rm = TRUE)
+  )
+
+# Print the final results
+print(final_results)
+```
+
+### Explanation:
+
+1. **Initial Filtering and Calculate `n`:**
+   - Filter the data where `bsp_legal_exp == 1`.
+   - Calculate `initial_n` as the number of rows in the filtered data.
+
+2. **Second Filtering:**
+   - Further filter the data to remove rows where `columnA != 1`.
+
+3. **Group and Calculate:**
+   - Group the data by `bsp_legal_cc` and `bsp_prov`.
+   - Summarize the grouped data to calculate sums for `old_pred`, `new_pred`, `total_inc`, and `total_paid`.
+   - Use `initial_n` to calculate `n_60` (60% of `initial_n`).
+   - Calculate the 60% values for each summarized column.
+
+4. **Automate Further Calculations:**
+   - Perform further summarizations or manipulations using the results from `average_impact`.
+   - The example shown calculates the total sums of the metrics.
+
+This approach ensures that the entire process is automated, eliminating the need for manual intervention. You can adjust the further calculations as per your specific requirements.
+
+
+
+
+
+
+
+
 Thank you for sharing the updated screenshot. The error indicates that there's an incorrect number of smoothing parameters supplied for a smooth term. Let's address this by ensuring that each smooth term receives a proper smoothing parameter.
 
 We'll simplify the approach and ensure each term is correctly handled.
