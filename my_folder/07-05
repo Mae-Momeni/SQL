@@ -1,3 +1,82 @@
+Based on the R code in the image you provided, here are specific recommendations to improve the code with best coding practices and efficiency:
+
+### Original Code
+```r
+model_input <- model_input %>%
+  left_join(bsp_fix, by = "CC_TYPECODE")
+
+if (!is.na(model_input$predicted_reserve_bsp)) {
+  df_output <- try({
+    model_input %>%
+      rename(pred_total = predicted_reserve_bsp) %>%
+      mutate(REP_TOT_PAID_CC = case_when(TOT_PAID_CC <= 0 ~ 0, TRUE ~ TOT_PAID_CC)) %>%
+      mutate(predicted_reserve = pred_total - REP_TOT_PAID_CC) %>%
+      left_join(minimal_threshold, by = "CC_TYPECODE") %>%
+      check_minimal_threshold() %>%
+      mutate(across(where(is.character), ~str_sub(.x, start = 1, end = min(nchar(.x), 255))))
+  })
+} else {
+  model_input <- bake(set_BI, new_data = model_input)
+}
+```
+
+### Recommendations
+
+1. **Combine `mutate` Calls:**
+   - Combine consecutive `mutate` calls into a single `mutate` to improve readability and potentially reduce overhead.
+
+2. **Vectorized Functions:**
+   - Ensure that functions used inside `mutate` are vectorized for efficiency.
+
+3. **Consistent Naming:**
+   - Use consistent and meaningful variable names.
+
+4. **Error Handling:**
+   - Use specific error handling instead of a general `try` block if possible. Consider logging or handling specific errors.
+
+5. **Comments:**
+   - Add comments to explain the purpose of major steps for better maintainability.
+
+6. **Avoid Deep Nesting:**
+   - Keep nesting levels to a minimum to enhance readability.
+
+Here is the improved version of your code incorporating these suggestions:
+
+### Improved Code
+```r
+library(dplyr)
+
+# Join with BSP fix data
+model_input <- model_input %>%
+  left_join(bsp_fix, by = "CC_TYPECODE")
+
+# Check if predicted_reserve_bsp is not NA
+if (!is.na(model_input$predicted_reserve_bsp)) {
+  # Try block to handle potential errors
+  df_output <- try({
+    model_input %>%
+      rename(pred_total = predicted_reserve_bsp) %>%
+      mutate(
+        REP_TOT_PAID_CC = case_when(
+          TOT_PAID_CC <= 0 ~ 0,
+          TRUE ~ TOT_PAID_CC
+        ),
+        predicted_reserve = pred_total - REP_TOT_PAID_CC
+      ) %>%
+      left_join(minimal_threshold, by = "CC
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 library(dplyr)
 
