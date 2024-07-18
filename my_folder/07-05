@@ -1,3 +1,91 @@
+
+Deep nesting refers to having multiple layers of nested code blocks, which can make the code harder to read and understand. In your case, the deep nesting occurs within the `if` statement and the `try` block, where multiple `mutate` calls and other operations are nested within each other. This can make it difficult to follow the logic and flow of the code.
+
+Let's break it down and see where the deep nesting occurs:
+
+### Original Code with Highlighted Nesting
+```r
+model_input <- model_input %>%
+  left_join(bsp_fix, by = "CC_TYPECODE")
+
+if (!is.na(model_input$predicted_reserve_bsp)) {  # 1st level
+  df_output <- try({                              # 2nd level
+    model_input %>%
+      rename(pred_total = predicted_reserve_bsp) %>%
+      mutate(REP_TOT_PAID_CC = case_when(         # 3rd level
+        TOT_PAID_CC <= 0 ~ 0, 
+        TRUE ~ TOT_PAID_CC
+      )) %>%
+      mutate(predicted_reserve = pred_total - REP_TOT_PAID_CC) %>%
+      left_join(minimal_threshold, by = "CC_TYPECODE") %>%
+      check_minimal_threshold() %>%
+      mutate(across(where(is.character), ~str_sub(.x, start = 1, end = min(nchar(.x), 255))))
+  })                                             # End of 2nd level
+} else {                                          # 1st level
+  model_input <- bake(set_BI, new_data = model_input)
+}
+```
+
+### Recommendations to Avoid Deep Nesting
+1. **Combine `mutate` Calls:**
+   - Combine multiple `mutate` calls into one to reduce nesting levels.
+
+2. **Separate Logical Steps:**
+   - Separate logical steps into distinct blocks or helper functions to make the code easier to read and maintain.
+
+Here’s an improved version that addresses deep nesting and readability:
+
+### Improved Code
+```r
+library(dplyr)
+
+# Join with BSP fix data
+model_input <- model_input %>%
+  left_join(bsp_fix, by = "CC_TYPECODE")
+
+# Function to handle the processing
+process_model_input <- function(input_data) {
+  input_data %>%
+    rename(pred_total = predicted_reserve_bsp) %>%
+    mutate(
+      REP_TOT_PAID_CC = case_when(
+        TOT_PAID_CC <= 0 ~ 0,
+        TRUE ~ TOT_PAID_CC
+      ),
+      predicted_reserve = pred_total - REP_TOT_PAID_CC
+    ) %>%
+    left_join(minimal_threshold, by = "CC_TYPECODE") %>%
+    check_minimal_threshold() %>%
+    mutate(across(where(is.character), ~str_sub(.x, start = 1, end = min(nchar(.x), 255))))
+}
+
+# Check if predicted_reserve_bsp is not NA
+if (!is.na(model_input$predicted_reserve_bsp)) {
+  # Try block to handle potential errors
+  df_output <- try({
+    process_model_input(model_input)
+  })
+} else {
+  model_input <- bake(set_BI, new_data = model_input)
+}
+```
+
+### Key Improvements:
+1. **Combining `mutate` Calls:**
+   - Combined multiple `mutate` calls into one to reduce the nesting.
+
+2. **Using a Helper Function:**
+   - Moved the processing logic into a helper function (`process_model_input`). This reduces the complexity within the `if` and `try` blocks and makes the main flow of the code easier to read.
+
+By separating the code into logical chunks and avoiding multiple levels of nesting, the code becomes more maintainable and easier to understand.
+
+
+
+
+
+
+99999999
+
 Based on the R code in the image you provided, here are specific recommendations to improve the code with best coding practices and efficiency:
 
 ### Original Code
