@@ -1,3 +1,44 @@
+
+library(dplyr)
+
+# Assuming bsp_fix and minimal_threshold are data frames available in the environment
+
+# Apply BSP Hotfix
+model_input <- model_input %>%
+  left_join(bsp_fix, by = "CC_TYPECODE")
+
+if (!is.na(model_input$predicted_reserve_bsp)) {
+  df_output <- try({
+    model_input %>%
+      rename(pred_total = predicted_reserve_bsp) %>%
+      mutate(
+        REP_TOT_PAID_CC = case_when(
+          TOT_PAID_CC <= 0 ~ 0,
+          TRUE ~ TOT_PAID_CC
+        ),
+        predicted_reserve = pred_total - REP_TOT_PAID_CC
+      ) %>%
+      left_join(minimal_threshold, by = "CC_TYPECODE") %>%
+      check_minimal_threshold() %>%
+      mutate(across(where(is.character), ~str_sub(.x, start = 1, end = min(nchar(.x), 255))))
+  })
+} else {
+  model_input <- bake(set_BI, new_data = model_input)
+}
+
+# Assuming you need to return or use df_output
+# df_output
+
+
+
+
+
+
+
+
+
+
+
 I've reviewed the image of the R code you provided. Here are some suggestions for improving the code in terms of best practices, efficiency, and optimization:
 
 1. **Code Readability and Style:**
