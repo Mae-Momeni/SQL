@@ -1,4 +1,41 @@
 
+Here's an improved version of your draft, emphasizing the importance of testing changes in code according to best data science practices:
+
+---
+
+### Testing Pull Requests (PRs)
+
+**Friday, July 19, 2024 2:21 PM**
+
+Testing PRs is fundamentally different from testing APIs. Currently, our tests for APIs are designed to compare development results with expected API responses. While this is essential, it is equally important to rigorously test PRs to ensure that any changes made to the code are correct and do not introduce new issues.
+
+**Why Testing PRs Matters:**
+1. **Code Quality Assurance:** Testing PRs helps maintain high code quality by catching bugs and errors early. It ensures that changes made to the codebase are functioning as intended.
+2. **Prevent Regression:** Comprehensive tests prevent regression, ensuring that new changes do not break existing functionality.
+3. **Robustness and Reliability:** By designing a variety of test cases, including edge cases, we can confirm that the code handles all scenarios effectively. This increases the robustness and reliability of our software.
+
+**Best Practices for Testing PRs:**
+1. **Designing Edge Cases:** Go beyond regular use cases and design edge cases to test the code's limits and unusual inputs. This helps in identifying potential weaknesses.
+2. **Automated Testing:** Implement automated tests where possible. Automation can significantly speed up the testing process and ensure consistent execution of test cases.
+3. **Code Reviews:** Pair testing with thorough code reviews. Encourage peer reviews to bring in different perspectives and catch potential issues that might be overlooked.
+4. **Documentation:** Document the tests and their expected outcomes. This makes it easier for the team to understand the testing process and results.
+5. **Continuous Integration:** Use continuous integration (CI) tools to automatically run tests whenever changes are pushed. This provides immediate feedback on the impact of the changes.
+
+**Action Plan:**
+- **Review Current Tests:** Evaluate our current testing framework and identify gaps where additional tests are needed.
+- **Enhance Test Coverage:** Focus on increasing test coverage, especially for critical and complex parts of the codebase.
+- **Collaborate and Educate:** Work together as a team to share knowledge about best practices in testing. Regularly hold sessions to discuss and improve our testing strategies.
+
+By adhering to these practices, we can ensure that every change made through a PR is thoroughly vetted, maintaining the integrity and performance of our codebase.
+
+---
+
+Feel free to modify this as needed to better fit your style or to include any additional points you find important.
+
+
+
+
+88888888888
 Deep nesting refers to having multiple layers of nested code blocks, which can make the code harder to read and understand. In your case, the deep nesting occurs within the `if` statement and the `try` block, where multiple `mutate` calls and other operations are nested within each other. This can make it difficult to follow the logic and flow of the code.
 
 Let's break it down and see where the deep nesting occurs:
