@@ -1,32 +1,23 @@
+### Summary:
 
-### Virtual Machine (VM) Requirements for Model Training
+**Context:**
+Our team needs to handle a 2M-row dataset and perform hyperparameter tuning on 10 XGBoost models. We require a VM that provides sufficient computational power and memory. A benchmark analysis and feedback from a team member (Jake) were used to determine the best configuration.
 
-**Overview:**
-Our team is tasked with handling a dataset of approximately 2 million rows and performing hyperparameter tuning across 10 XGBoost models. To efficiently execute these tasks, we need a Virtual Machine (VM) that provides sufficient computational power and memory. We have benchmark results from a similar team and feedback from a former team member, which guide our recommendation.
+**Options:**
 
-**Benchmark Analysis:**
-A comprehensive benchmark has been performed to identify the optimal architecture and resources required for similar workloads. The analysis covers the performance and cost of D-series and F-series VMs on Microsoft Azure.
+- **D-series VMs:**
+  - **Usage**: Suitable for day-to-day operations with moderate computational needs.
+  - **Example**: D16as_v4 with 16 cores and 64 GB RAM at ~$799.87/month. 
+  - **Cost-Effective**: Good for general workloads.
 
-- **D-series VMs**:
-  - Commonly used for day-to-day operations requiring moderate computational resources.
-  - **Example Configuration**: D16as_v4 with 16 cores and 64 GB RAM is priced around $799.87 per month.
-  - **Cost-effective** and suitable for general workloads.
+- **F-series VMs:**
+  - **Usage**: Designed for more intensive tasks, especially those requiring higher CPU performance.
+  - **Example**: F16s_v2 with 16 cores and 32 GB RAM at ~$694.04/month.
+  - **High Performance**: Ideal for parallel processing and complex calculations but at a higher cost.
 
-- **F-series VMs**:
-  - Designed for more intensive computational tasks, particularly where higher CPU performance is required.
-  - **Example Configuration**: F16s_v2 with 16 cores and 32 GB RAM costs about $694.04 per month.
-  - **Higher performance** but at a higher cost, ideal for parallel processing and complex calculations.
-
-**Team Feedback:**
-successfully managed similar tasks with a VM configured with 64 GB RAM and 8 cores. This suggests that our team might not need the most expensive or powerful configurations.
-
-**Recommended Configuration:**
-Considering both the benchmark analysis and team feedback:
-- **Initial Configuration**: A VM with **64 GB RAM and 8 cores**. This setup has been shown to be sufficient for similar tasks and provides a good balance between performance and cost.
-- **VM Options**:
-  - **D-series (D8as_v4)**: 8 cores, 64 GB RAM, estimated cost of approximately **$399.89 per month**.
-  - **F-series (custom configuration)**: Start with 8 cores and 64 GB RAM if available, or consider **F16s_v2** if higher performance is needed.
-- **Scalability**: The VM should allow easy scaling (both upgrading and downgrading) depending on the evolving needs. This flexibility ensures that we can manage costs effectively while meeting our performance requirements.
+**Recommendation:**
+- **Start with** a configuration of **64 GB RAM and 8 cores** (e.g., D8as_v4 at ~$399.89/month). This has proven sufficient in similar scenarios and offers a balance of performance and cost.
+- **Scalability**: The VM should allow for easy upgrades or downgrades based on need. If more power is required, consider moving to an F-series VM or increasing the cores in the D-series.
 
 **Conclusion:**
-We recommend starting with a 64 GB RAM and 8-core configuration as it aligns with both the benchmark data and feedback from similar projects. This setup is cost-effective while providing sufficient computational resources for our tasks. Should the workload increase, scali  management with a clear and well-supported recommendation for securing a VM that meet the needs
+Starting with 64 GB RAM and 8 cores is the best approach. It’s cost-effective and aligns with both benchmark data and previous team experience. This setup provides sufficient power for our tasks, with flexibility to scale as needed.
