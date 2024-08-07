@@ -1,3 +1,9 @@
+library(ggplot2)
+library(lubridate)
+
+# Assuming YearMonth is in "YYYYMM" format, convert it to Date
+data_graph <- data_graph %>%
+  mutate(YearMonth = ymd(paste0(YearMonth, "01")))
 
 data_graph %>%
   left_join(data_graph2) %>%
@@ -7,26 +13,27 @@ data_graph %>%
     variable == "Mean Model in Prod" ~ "Model in Prod"
   )) %>%
   ggplot(aes(x = YearMonth)) +
-  geom_point(aes(x = YearMonth, y = value / 1000, col = variable)) +
-  geom_errorbar(aes(ymin = value - sd, ymax = value + sd, col = variable), width = .1) +
+  geom_line(aes(y = value / 1000, col = variable), size = 1) +  # Using geom_line instead of geom_point for a line plot
+  geom_errorbar(aes(ymin = value - sd, ymax = value + sd, col = variable), width = 0.1) +
   labs(
     title = paste("Exposure level - max number of observations: ", max(data_graph$n)),
     x = "YearMonth",
     y = "Total amount - in thousands"
   ) +
+  scale_x_date(date_labels = "%Y", date_breaks = "2 years") +  # Adjusting the x-axis labels to show years at 2-year intervals
   expand_limits(y = 0) +
   scale_color_manual(values = c("Model in Prod" = "#CC6666", "New Model" = "#66CC99", "Actual Required" = "#9999CC")) +
   scale_y_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE)) +
   theme_bw() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 12),
-    axis.text.y = element_text(size = 12),
-    axis.title.x = element_text(size = 14),
-    axis.title.y = element_text(size = 14),
-    plot.title = element_text(size = 16, hjust = 0.5),
-    legend.title = element_text(size = 14),
-    legend.text = element_text(size = 12),
-    aspect.ratio = 0.5  # Adjusting the aspect ratio to make the plot wider
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),  # No rotation, center the labels
+    axis.text.y = element_text(size = 10),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.title = element_text(size = 14, hjust = 0.5),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    aspect.ratio = 0.5
   ) -> g
 
 # Display the plot
