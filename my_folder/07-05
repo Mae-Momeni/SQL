@@ -1,1 +1,36 @@
 
+data_graph %>%
+  left_join(data_graph2) %>%
+  mutate(variable = case_when(
+    variable == "Mean New Model" ~ "New Model",
+    variable == "Mean amount left" ~ "Actual Required",
+    variable == "Mean Model in Prod" ~ "Model in Prod"
+  )) %>%
+  ggplot(aes(x = YearMonth)) +
+  geom_point(aes(x = YearMonth, y = value / 1000, col = variable)) +
+  geom_errorbar(aes(ymin = value - sd, ymax = value + sd, col = variable), width = .1) +
+  labs(
+    title = paste("Exposure level - max number of observations: ", max(data_graph$n)),
+    x = "YearMonth",
+    y = "Total amount - in thousands"
+  ) +
+  expand_limits(y = 0) +
+  scale_color_manual(values = c("Model in Prod" = "#CC6666", "New Model" = "#66CC99", "Actual Required" = "#9999CC")) +
+  scale_y_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE)) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
+    plot.title = element_text(size = 16, hjust = 0.5),
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12),
+    aspect.ratio = 0.5  # Adjusting the aspect ratio to make the plot wider
+  ) -> g
+
+# Display the plot
+print(g)
+
+# Optionally save the plot as a wide image
+ggsave("wide_plot.png", plot = g, width = 12, height = 6)
