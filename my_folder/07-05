@@ -1,14 +1,71 @@
-library(lubridate)
-library(dplyr)
-library(reshape2)
+# Load necessary libraries
+library(gbm)
+library(pdp)
+library(iml)
+library(here)
+library(xgboost)
+library(vip) # Load the vip package for feature importance visualization
 
-# Convert YearMonth to Date format
-data_graph <- data_graph %>%
-  mutate(YearMonth = ymd(paste0(YearMonth, "01")))  # Assuming YearMonth is in YYYYMM format
+# Function to load models
+load_models <- function(mod_lookup = model_lookup) {
+  for (i in 1:nrow(mod_lookup)) {
+    file_name <- mod_lookup[i, ] %>% pull(file_name)
+    env_name <- mod_lookup[i, ] %>% pull(env_name)
+    
+    assign(
+      env_name,
+      readRDS(here("data/api/bundle_to_api/", file_name)),
+      envir = .GlobalEnv
+    )
+  }
+}
 
-data_graph2 <- data_graph2 %>%
-  mutate(YearMonth = ymd(paste0(YearMonth, "01")))  # Ensure YearMonth is in the same format
+# Lookup table for models
+model_lookup <- tribble(
+  ~env_name, ~file_name,
+  "mod_prob_auto_indemnity", "mod_prob_auto_indemnity.rds",
+  "mod_sev_auto_indemnity", "mod_sev_auto_indemnity.rds",
+  "mod_prob_commercial_indemnity", "mod_prob_commercial_indemnity.rds",
+  "mod_sev_commercial_indemnity", "mod_sev_commercial_indemnity.rds",
+  "mod_prob_other_expenses", "mod_prob_other_expenses.rds",
+  "mod_sev_other_expenses", "mod_sev_other_expenses.rds",
+  "mod_prob_habit_farm", "mod_prob_habit_farm.rds",
+  "mod_sev_habit_farm", "mod_sev_habit_farm.rds",
+  "mod_prob_legal", "mod_prob_legal.rds",
+  "mod_sev_legal", "mod_sev_legal.rds"
+)
 
-# Now you can join them without type mismatch issues
-data_combined <- data_graph %>%
-  left_join(data_graph2, by = c("YearMonth", "n"))
+# Load models
+load_models()
+
+# Data frame to store model names and titles for plots
+all_groups <- data.frame(
+  model = c(
+    "mod_prob_auto_indemnity", "mod_sev_auto_indemnity",
+    "mod_prob_commercial_indemnity", "mod_sev_commercial_indemnity",
+    "mod_prob_other_expenses", "mod_sev_other_expenses",
+    "mod_prob_habit_farm", "mod_sev_habit_farm",
+    "mod_prob_legal", "mod_sev_legal"
+  ),
+  noms = c(
+    "Probability - Auto Indemnity", "Severity - Auto Indemnity",
+    "Probability - Commercial Indemnity", "Severity - Commercial Indemnity",
+    "Probability - Other Expenses", "Severity - Other Expenses",
+    "Probability - Habit Farm", "Severity - Habit Farm",
+    "Probability - Legal", "Severity - Legal"
+  ),
+  stringsAsFactors = FALSE
+)
+
+# Loop to calculate and plot feature importance for each model
+for(i in 1:nrow(all_groups)) {
+  mod <- get(all_groups$model[i])
+  
+  # Calculate feature importance and generate plot
+  vip_plot <- vip(mod, n = 20) +
+    theme_bw() +
+    labs(title = all_groups$noms[i])
+  
+  # Print the plot
+  print(vip_plot)
+}
