@@ -1,21 +1,85 @@
-# Assuming 'mod' is your trained model and 'mod$trainingData' is the training data used
+# Load necessary libraries
+library(gbm)
+library(pdp)
+library(iml)
+library(here)
+library(xgboost)
+library(lime)  # Load the lime package for model interpretability
 
-# 1. Prepare the explainer using lime
-explainer <- lime(
-  select(mod$trainingData, -.outcome),  # Select all features except the outcome variable
-  mod,                                  # The model object
-  bin_continuous = TRUE                 # Bin continuous variables for better interpretation
+# Function to load models
+load_models <- function(mod_lookup = model_lookup) {
+  for (i in 1:nrow(mod_lookup)) {
+    file_name <- mod_lookup[i, ] %>% pull(file_name)
+    env_name <- mod_lookup[i, ] %>% pull(env_name)
+    
+    assign(
+      env_name,
+      readRDS(here("data/api/bundle_to_api/", file_name)),
+      envir = .GlobalEnv
+    )
+  }
+}
+
+# Lookup table for models
+model_lookup <- tribble(
+  ~env_name, ~file_name,
+  "mod_prob_auto_indemnity", "mod_prob_auto_indemnity.rds",
+  "mod_sev_auto_indemnity", "mod_sev_auto_indemnity.rds",
+  "mod_prob_commercial_indemnity", "mod_prob_commercial_indemnity.rds",
+  "mod_sev_commercial_indemnity", "mod_sev_commercial_indemnity.rds",
+  "mod_prob_other_expenses", "mod_prob_other_expenses.rds",
+  "mod_sev_other_expenses", "mod_sev_other_expenses.rds",
+  "mod_prob_habit_farm", "mod_prob_habit_farm.rds",
+  "mod_sev_habit_farm", "mod_sev_habit_farm.rds",
+  "mod_prob_legal", "mod_prob_legal.rds",
+  "mod_sev_legal", "mod_sev_legal.rds"
 )
 
-# 2. Generate an explanation for a sample of the data
-explanation <- explain(
-  sample_n(mod$trainingData, 1) %>% select(-.outcome), # Take a sample of one instance from the data
-  explainer,
-  n_features = 10  # Number of top features to display
+# Load models
+load_models()
+
+# Data frame to store model names and titles for plots
+all_groups <- data.frame(
+  model = c(
+    "mod_prob_auto_indemnity", "mod_sev_auto_indemnity",
+    "mod_prob_commercial_indemnity", "mod_sev_commercial_indemnity",
+    "mod_prob_other_expenses", "mod_sev_other_expenses",
+    "mod_prob_habit_farm", "mod_sev_habit_farm",
+    "mod_prob_legal", "mod_sev_legal"
+  ),
+  noms = c(
+    "Probability - Auto Indemnity", "Severity - Auto Indemnity",
+    "Probability - Commercial Indemnity", "Severity - Commercial Indemnity",
+    "Probability - Other Expenses", "Severity - Other Expenses",
+    "Probability - Habit Farm", "Severity - Habit Farm",
+    "Probability - Legal", "Severity - Legal"
+  ),
+  stringsAsFactors = FALSE
 )
 
-# 3. Plot the feature importance using the explanation from LIME
-plot_features(explanation, ncol = 1) -> g
-
-# 4. Print the plot
-print(g)
+# Loop to calculate and plot feature importance for each model using LIME
+for(i in 1:nrow(all_groups)) {
+  mod <- get(all_groups$model[i])
+  
+  # Prepare the LIME explainer
+  explainer <- lime(
+    select(mod$trainingData, -.outcome),  # Select all features except the outcome variable
+    mod,                                  # The model object
+    bin_continuous = TRUE                 # Bin continuous variables for better interpretation
+  )
+  
+  # Generate an explanation for a sample of the data
+  explanation <- explain(
+    sample_n(mod$trainingData, 1) %>% select(-.outcome), # Take a sample of one instance from the data
+    explainer,
+    n_features = 10  # Number of top features to display
+  )
+  
+  # Plot the feature importance using the explanation from LIME
+  g <- plot_features(explanation, ncol = 1) +
+    theme_bw() +
+    labs(title = all_groups$noms[i])
+  
+  # Print the plot
+  print(g)
+}
