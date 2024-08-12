@@ -1,25 +1,12 @@
-General Benefits of Dedicated Machines:
-1. Performance and Efficiency:
+The performance considerations for disk storage (IOPS and throughput) are independent of the programming language you use, as they are more related to how data is read from and written to the disk and the computational demands of your tasks.
 
-Optimized Resources: Dedicated machines ensure that your team has access to consistent and reliable computing power, tailored specifically to the demands of your workloads. This reduces latency and improves the speed of data processing, model training, and analysis.
-Reduced Risk of Downtime: With dedicated resources, you minimize the risk of crashes and slowdowns that can occur on shared servers, particularly during peak usage times or when running intensive tasks.
-2. Consistency and Reliability:
+Why This Still Applies:
+Data Manipulation: Whether in R or Python, manipulating a dataset of 2 million rows and 100 columns (approximately 2GB) involves similar I/O operations, and the SSD’s performance will affect how quickly data can be read into memory and written back to disk.
 
-Predictable Performance: Dedicated machines offer predictable and stable performance, crucial for teams that need to meet tight deadlines and produce consistent results.
-Tailored Environments: Teams can customize their development environments, ensuring compatibility with the tools and libraries they rely on.
-3. Scalability:
+XGBoost and Computational Tasks: Training machine learning models and performing hyper-parameter tuning are computationally intensive tasks that rely heavily on both CPU/GPU resources and the underlying disk’s speed for reading data and writing temporary files. This is true regardless of whether you’re using R or Python.
 
-Flexible Resource Management: Dedicated machines provide the flexibility to scale resources up or down as needed, allowing teams to adapt to changing project demands and data volumes.
-Specific Benefits for Our Data Science Team:
-1. Performance and Efficiency:
+Multi-User Environment: When multiple users are working on a shared virtual server, the combined disk I/O from different users' R processes can add up, making a faster SSD (like Premium SSD) beneficial to avoid slowdowns.
 
-Critical Need for Stability: Our team frequently handles large datasets (2 million rows, 100 columns, approximately 2GB in size) and performs intensive tasks like hyper-parameter tuning with XGBoost. Currently, these processes often lead to program crashes or significantly prolonged runtimes on shared ADA servers. Dedicated machines would provide the necessary computational power to ensure these tasks run smoothly and efficiently, without disruptions.
-Improved Productivity: By reducing the occurrence of crashes and delays, our team can complete data analysis, training, and manipulation tasks more quickly, leading to faster insights and decision-making.
-2. Focused on Performance, Not Security:
-
-No Additional Security Concerns: While security is always important, our current ADA servers are already compliant with IT security standards, so our primary focus is on improving performance. The move to dedicated machines is driven purely by the need for more robust and reliable computing power to support our growing data science workloads.
-3. Avoiding Bottlenecks and Downtime:
-
-Consistency Across Team Tasks: With 5 data scientists working simultaneously, shared servers can become bottlenecks, especially when multiple users are running resource-intensive tasks. Dedicated machines will ensure that all team members can work efficiently, without being hindered by resource limitations or server crashes.
-Conclusion:
-The move to dedicated machines is a strategic investment in our team's ability to perform at its best. By addressing the critical issues of performance and efficiency, particularly during hyper-parameter tuning and large dataset processing, we can ensure that our work is delivered on time and without the risk of crashes. This transition is about optimizing our existing processes, not adding complexity, and it will directly contribute to our productivity and the overall success of our projects.
+Summary:
+RStudio and R-based Workloads: The recommendations for Standard vs. Premium SSD apply equally to R, as they would to Python, because the underlying factors (data size, computational intensity, multi-user environment) are the same.
+Premium SSD remains the recommended choice if you anticipate heavy computational tasks or multiple users working simultaneously. If your workloads are typically lighter, Standard SSD could suffice, but be prepared to upgrade if performance issues arise.
