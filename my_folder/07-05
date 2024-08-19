@@ -1,37 +1,80 @@
-Monitoring for model drift in a total loss machine learning model, especially in the insurance context where precision and recall are critical metrics, is essential to ensure the model continues to perform accurately over time. Here are some strategies and implementations you can consider:
+### **Report on Progressive Analysis of RMSE and MAE with Sampled Data**
 
-### 1. **Data Drift Monitoring:**
-   - **Feature Distribution Tracking:** Monitor the statistical distributions of input features over time. If the distribution of features changes significantly, this could indicate data drift.
-   - **Population Stability Index (PSI):** Calculate the PSI between the current data and the training data. A significant PSI score indicates a shift in data distribution.
-   - **Covariate Shift Detection:** Implement tests to detect changes in the distribution of the input variables compared to the training set. Methods like Kolmogorov-Smirnov tests can be used for continuous variables.
+---
 
-### 2. **Concept Drift Monitoring:**
-   - **Performance Metrics Monitoring:** Continuously track the model's precision and recall on a rolling basis. Significant drops in these metrics can indicate concept drift.
-   - **Recurring Training:** Periodically retrain the model on the latest data to ensure it adapts to any changes in the underlying data distribution.
+#### **1. Introduction**
 
-### 3. **Model Performance Monitoring:**
-   - **Out-of-Sample Testing:** Continuously evaluate the model on a hold-out or a validation set that is not used in training.
-   - **Benchmarking:** Compare the model’s current performance against a simpler benchmark model (e.g., a logistic regression or a rules-based system) to detect if the machine learning model’s performance has degraded over time.
+This report summarizes the progressive analysis conducted on RMSE (Root Mean Square Error) and MAE (Mean Absolute Error) to determine the optimal sampling percentage of a large dataset (1.1 million rows) for hyperparameter tuning using XGBoost. The objective was to find a sample size that balances computational efficiency with model accuracy.
 
-### 4. **Adversarial Validation:**
-   - **Adversarial Validation Models:** Train a model to distinguish between the training data and new data. If this model performs well, it indicates that there are differences between the datasets, signaling potential drift.
+---
 
-### 5. **Retraining Triggers:**
-   - **Threshold-based Retraining:** Set thresholds for acceptable changes in precision, recall, or other metrics. If the model’s performance goes beyond these thresholds, trigger a retraining process.
-   - **Periodic Retraining:** Even without detected drift, periodically retraining the model on new data ensures it remains current.
+#### **2. Objective**
 
-### 6. **Calibration Monitoring:**
-   - **Probability Calibration:** Ensure that the model’s predicted probabilities are well-calibrated over time, particularly in contexts where the cost of false positives and false negatives may vary.
+The primary objective was to identify the smallest sample size that provides stable and representative model performance metrics (RMSE and MAE), allowing for efficient hyperparameter tuning without sacrificing the model's ability to generalize on the full dataset.
 
-### 7. **Segmented Analysis:**
-   - **Subgroup Monitoring:** Track the model’s performance across different segments (e.g., claim types, geographic regions) to detect if drift is occurring in specific subgroups.
+---
 
-### 8. **Drift Detection Algorithms:**
-   - **CUSUM:** Implement cumulative sum (CUSUM) control charts to detect shifts in the mean level of the model’s predictions.
-   - **ADWIN (Adaptive Windowing):** A statistical method that automatically detects and adapts to changes in data distribution, useful for detecting both gradual and abrupt changes.
+#### **3. RMSE Progressive Analysis**
 
-### 9. **Automation and Alerts:**
-   - **Automated Monitoring Systems:** Set up automated systems that regularly check for drift and send alerts if any significant changes are detected.
-   - **Dashboarding:** Use dashboards to visualize model performance and drift metrics over time for easy monitoring by stakeholders.
+- **Initial Observations:**
+  - The RMSE showed a noticeable decrease when increasing the sample size from very small percentages up to around 10-20% of the dataset.
+  
+- **Stabilization:**
+  - Beyond 20%, RMSE values stabilized, indicating that additional data beyond this point provided diminishing returns in terms of improving the model's accuracy.
+  
+- **RMSE Fluctuations:**
+  - The amount of RMSE fluctuations across different sample sizes ranged between **-1.5% and +0.5%**. This indicates a relatively stable performance with minor variations as the sample size changes.
+  
+- **Key Insight:**
+  - The stabilization of RMSE, combined with the small fluctuation range, suggests that a sample size around 20% is sufficiently representative for the purposes of hyperparameter tuning. Using larger samples may not significantly improve the model's performance but will increase computational costs.
 
-By implementing these monitoring strategies, you can ensure that your total loss model remains robust and continues to deliver reliable predictions as the data and business environment evolve.
+---
+
+#### **4. MAE Progressive Analysis**
+
+- **Initial Observations:**
+  - The MAE curve also showed an initial decrease as the sample size increased from very small percentages up to around 5-10% of the dataset.
+  
+- **Stabilization:**
+  - The MAE values stabilized around the 5-10% sample size, with minimal improvement as the sample size increased further.
+  
+- **Key Insight:**
+  - The stabilization of MAE at around 5-10% reinforces the finding that smaller samples can provide a good approximation of model performance, suggesting that this range might be efficient for hyperparameter tuning.
+
+---
+
+#### **5. Comparative Analysis of RMSE and MAE**
+
+- **Consistency in Metrics:**
+  - Both RMSE and MAE metrics stabilized at similar points on the curve, with RMSE stabilizing around 20% and MAE showing stable behavior from 5-10%.
+  
+- **Efficiency vs. Accuracy:**
+  - While RMSE suggests that 20% might be optimal, MAE shows that even smaller samples (around 5-10%) could be effective. This presents an opportunity to choose a sample size based on the need for computational efficiency versus the desire to capture as much data variability as possible.
+
+---
+
+#### **6. Recommendations**
+
+Based on the analysis of RMSE and MAE, the following recommendations are proposed:
+
+1. **Primary Recommendation - 10% Sample Size:**
+   - **Efficiency and Accuracy:** Using 10% of the dataset for hyperparameter tuning strikes a good balance between computational efficiency and maintaining model accuracy. This size is supported by the stabilization observed in both RMSE and MAE curves.
+   - **Validation:** After tuning, validate the final model on a larger dataset (e.g., 50% or the entire dataset) to ensure that the selected hyperparameters generalize well to the full dataset.
+
+2. **Alternative Recommendation - 5% Sample Size:**
+   - **High Efficiency:** If computational resources are severely limited, a 5% sample size could be used. This sample size still provides reasonably stable MAE results, though care should be taken to validate the final model thoroughly on a larger dataset.
+   - **Validation:** Given the smaller sample size, it is even more critical to validate the model on a larger dataset post-tuning to ensure robustness.
+
+3. **Conservative Approach - 20% Sample Size:**
+   - **Maximized Accuracy:** For situations where computational efficiency is less of a concern, and the priority is on maximizing accuracy and reducing error margins, a 20% sample size could be used. This size captures the stabilization point of RMSE and should yield high-quality tuning results.
+   - **Validation:** Validate as usual on a larger dataset, though this approach should already provide strong generalization.
+
+---
+
+#### **7. Conclusion**
+
+The progressive analysis of RMSE and MAE has provided a clear indication of where diminishing returns set in as sample size increases. A 10% sample size is recommended for efficient and effective hyperparameter tuning, balancing both computational resources and model performance. Smaller or larger sample sizes can be used based on specific resource constraints and accuracy requirements, but careful validation is essential to ensure model robustness.
+
+---
+
+This report serves as a guide for selecting an appropriate sample size for hyperparameter tuning, ensuring that the process is both efficient and effective in delivering a well-generalized model. The consideration of RMSE fluctuations between -1.5% and +0.5% further reinforces the reliability of the stabilization points identified in this analysis.
