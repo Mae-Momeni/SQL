@@ -1,80 +1,34 @@
-### **Report on Progressive Analysis of RMSE and MAE with Sampled Data**
+Setting the seed inside the `create_index` function ensures that the random sampling done by that function is reproducible across different runs, but it does not address parallel processing specifically.
 
----
+When you're working with parallel processing in R (e.g., with `foreach` or other parallel libraries), random number generation can be handled differently, depending on how the parallel backend is set up. Each worker in parallel processing may start with a different seed unless explicitly set, which can lead to non-reproducible results even if a seed is set before parallel processing begins.
 
-#### **1. Introduction**
+To ensure reproducibility across parallel processes, you typically need to use a package like `doRNG`, which manages random number generation in a way that guarantees reproducibility even when running in parallel.
 
-This report summarizes the progressive analysis conducted on RMSE (Root Mean Square Error) and MAE (Mean Absolute Error) to determine the optimal sampling percentage of a large dataset (1.1 million rows) for hyperparameter tuning using XGBoost. The objective was to find a sample size that balances computational efficiency with model accuracy.
+Here's how you can integrate `doRNG` with your existing parallel processing setup:
 
----
+```r
+library(doParallel)
+library(doRNG)
 
-#### **2. Objective**
+# Assuming you're using a parallel backend like this:
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl)
 
-The primary objective was to identify the smallest sample size that provides stable and representative model performance metrics (RMSE and MAE), allowing for efficient hyperparameter tuning without sacrificing the model's ability to generalize on the full dataset.
+# Use doRNG to ensure reproducibility
+registerDoRNG(seed = 1818)
 
----
+# Now your parallel loop or trainControl will have reproducible results
+results <- foreach(i = 1:number_cv, .combine = rbind) %dopar% {
+  # Your parallel code here
+}
 
-#### **3. RMSE Progressive Analysis**
+stopCluster(cl)
+```
 
-- **Initial Observations:**
-  - The RMSE showed a noticeable decrease when increasing the sample size from very small percentages up to around 10-20% of the dataset.
-  
-- **Stabilization:**
-  - Beyond 20%, RMSE values stabilized, indicating that additional data beyond this point provided diminishing returns in terms of improving the model's accuracy.
-  
-- **RMSE Fluctuations:**
-  - The amount of RMSE fluctuations across different sample sizes ranged between **-1.5% and +0.5%**. This indicates a relatively stable performance with minor variations as the sample size changes.
-  
-- **Key Insight:**
-  - The stabilization of RMSE, combined with the small fluctuation range, suggests that a sample size around 20% is sufficiently representative for the purposes of hyperparameter tuning. Using larger samples may not significantly improve the model's performance but will increase computational costs.
+With `doRNG`, setting the seed as shown above will ensure that all parallel workers use the same seed and that results are reproducible across runs.
 
----
+In summary:
+- The `set.seed()` inside the `create_index` function ensures that the random sampling within that function is consistent across runs.
+- To make sure that parallel processing also uses a consistent random seed across workers, you need to use something like `doRNG`.
 
-#### **4. MAE Progressive Analysis**
-
-- **Initial Observations:**
-  - The MAE curve also showed an initial decrease as the sample size increased from very small percentages up to around 5-10% of the dataset.
-  
-- **Stabilization:**
-  - The MAE values stabilized around the 5-10% sample size, with minimal improvement as the sample size increased further.
-  
-- **Key Insight:**
-  - The stabilization of MAE at around 5-10% reinforces the finding that smaller samples can provide a good approximation of model performance, suggesting that this range might be efficient for hyperparameter tuning.
-
----
-
-#### **5. Comparative Analysis of RMSE and MAE**
-
-- **Consistency in Metrics:**
-  - Both RMSE and MAE metrics stabilized at similar points on the curve, with RMSE stabilizing around 20% and MAE showing stable behavior from 5-10%.
-  
-- **Efficiency vs. Accuracy:**
-  - While RMSE suggests that 20% might be optimal, MAE shows that even smaller samples (around 5-10%) could be effective. This presents an opportunity to choose a sample size based on the need for computational efficiency versus the desire to capture as much data variability as possible.
-
----
-
-#### **6. Recommendations**
-
-Based on the analysis of RMSE and MAE, the following recommendations are proposed:
-
-1. **Primary Recommendation - 10% Sample Size:**
-   - **Efficiency and Accuracy:** Using 10% of the dataset for hyperparameter tuning strikes a good balance between computational efficiency and maintaining model accuracy. This size is supported by the stabilization observed in both RMSE and MAE curves.
-   - **Validation:** After tuning, validate the final model on a larger dataset (e.g., 50% or the entire dataset) to ensure that the selected hyperparameters generalize well to the full dataset.
-
-2. **Alternative Recommendation - 5% Sample Size:**
-   - **High Efficiency:** If computational resources are severely limited, a 5% sample size could be used. This sample size still provides reasonably stable MAE results, though care should be taken to validate the final model thoroughly on a larger dataset.
-   - **Validation:** Given the smaller sample size, it is even more critical to validate the model on a larger dataset post-tuning to ensure robustness.
-
-3. **Conservative Approach - 20% Sample Size:**
-   - **Maximized Accuracy:** For situations where computational efficiency is less of a concern, and the priority is on maximizing accuracy and reducing error margins, a 20% sample size could be used. This size captures the stabilization point of RMSE and should yield high-quality tuning results.
-   - **Validation:** Validate as usual on a larger dataset, though this approach should already provide strong generalization.
-
----
-
-#### **7. Conclusion**
-
-The progressive analysis of RMSE and MAE has provided a clear indication of where diminishing returns set in as sample size increases. A 10% sample size is recommended for efficient and effective hyperparameter tuning, balancing both computational resources and model performance. Smaller or larger sample sizes can be used based on specific resource constraints and accuracy requirements, but careful validation is essential to ensure model robustness.
-
----
-
-This report serves as a guide for selecting an appropriate sample size for hyperparameter tuning, ensuring that the process is both efficient and effective in delivering a well-generalized model. The consideration of RMSE fluctuations between -1.5% and +0.5% further reinforces the reliability of the stabilization points identified in this analysis.
+Thus, the function itself doesn't remove the need to set the seed for parallel processing—`doRNG` or similar approaches are still necessary for full reproducibility in a parallel context.
