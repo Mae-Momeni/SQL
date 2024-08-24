@@ -1,0 +1,95 @@
+### **Report on Progressive Analysis of Model Accuracy and RMSE with Sampled Data**
+
+---
+
+#### **1. Problem Statement**
+
+In the context of building and fine-tuning predictive models for BI Auto, our goal is to optimize model performance while balancing computational efficiency. Given the large dataset size, it is impractical to use the entire dataset for every phase of model training and tuning. Therefore, determining an appropriate sampling percentage that ensures both accuracy and efficiency is critical.
+
+---
+
+#### **2. Objective**
+
+The primary objective of this analysis is to identify the optimal sampling percentage of the dataset for two key models:
+1. **Probability Model:** Focused on predicting the likelihood of certain outcomes.
+2. **Severity Model:** Aimed at estimating the magnitude of those outcomes using RMSE as a performance metric.
+
+This analysis aims to establish a sampling strategy that achieves high model accuracy and minimized RMSE, while also considering computational constraints.
+
+---
+
+#### **3. Assumptions**
+
+- **Train/Test/Validation Split:** The dataset was split into 65% training, 15% testing, and 20% validation.
+- **Random Sampling:** A single random sampling approach was used for each observation. Although there might be a randomness impact, it is expected to be negligible due to the large dataset size.
+
+---
+
+#### **4. Methodology**
+
+**Progressive Sampling Approach:**
+- **Accuracy of Probability Model:** The accuracy was measured across different sampling percentages (ranging from small samples to the full dataset) to observe how accuracy stabilizes as more data is included.
+- **RMSE of Severity Model:** The RMSE was similarly analyzed across varying sample sizes to determine the point at which RMSE stabilizes, indicating sufficient data for reliable model performance.
+
+**Secondary Analysis:**
+- **Normalized RMSE and MAE (Severity Model):** These metrics were calculated to provide additional insights, focusing on a normalized version of RMSE (divided by the mean value of actual observations) and MAE to compare error magnitudes at different sampling levels.
+
+---
+
+#### **5. Progressive Analysis Results**
+
+##### **5.1. Accuracy of the Probability Model**
+- **Observations:**
+  - The accuracy stabilizes quickly, with significant improvements observed up to approximately 10% of the dataset.
+  - Beyond 10%, the accuracy curve flattens, indicating diminishing returns from adding more data.
+
+- **Key Insight:**
+  - A sample size of around 10% appears to be sufficient to capture the essential patterns in the data for the probability model, making it a strong candidate for hyperparameter tuning with minimal loss in accuracy.
+
+##### **5.2. RMSE of the Severity Model**
+- **Observations:**
+  - The RMSE decreases sharply with increased sampling up to around 20%, after which the improvements become marginal.
+  - Beyond 20%, the RMSE stabilizes, indicating that additional data contributes little to further reducing prediction errors.
+
+- **Key Insight:**
+  - A sample size of 20% is recommended for the severity model, as this size balances RMSE reduction with computational efficiency.
+
+##### **5.3. Secondary Analysis: Normalized RMSE and MAE (Severity Model)**
+- **Normalized RMSE and MAE:** Both metrics displayed stabilization trends similar to the primary RMSE analysis, with the normalized RMSE fluctuating within a range of -1.5% to +0.5%. This further confirms that 10-20% sampling captures the critical aspects of the data.
+- **Importance:** While these metrics are less critical than the primary analysis, they provide additional confidence in the selected sample size range.
+
+---
+
+#### **6. Results Discussion**
+
+**Accuracy of Probability Model:**
+- The rapid stabilization of accuracy at around 10% suggests that this sample size is adequate for the probability model. Using a smaller sample (5-10%) can still yield high accuracy, making it a viable option for hyperparameter tuning where efficiency is prioritized.
+
+**RMSE of Severity Model:**
+- The RMSE stabilizes around 20%, indicating that this sample size is optimal for capturing the necessary variance in the data to accurately model severity. Smaller samples might result in underfitting, while larger samples offer minimal gains in error reduction.
+
+**Secondary Metrics:**
+- The normalized RMSE and MAE support the findings of the primary analysis, with both metrics showing stability in the 10-20% sampling range. This reinforces the decision to use these sample sizes for different aspects of model tuning.
+
+---
+
+#### **7. Recommendations**
+
+1. **Primary Recommendation - 10% Sample Size for Initial Insights on Probability Model:**
+   - **Efficiency and Accuracy:** Use 10% of the dataset to gain initial insights into tuning parameters for the probability model. This provides a good balance between accuracy and computational efficiency.
+
+2. **Primary Recommendation - 20% Sample Size for Main Tuning of Both Models:**
+   - **Probability Model:** After gaining insights with 10% sampling, use 20% of the dataset for the main tuning process to ensure the probability model is robust and well-tuned.
+   - **Severity Model:** Similarly, use a 20% sample size for tuning the severity model to optimize RMSE while managing computational resources.
+   - **Validation:** For both models, validate the final tuned models on a larger dataset to ensure they generalize well to the full dataset.
+
+3. **Consideration of Secondary Metrics:**
+   - While the normalized RMSE and MAE are secondary to the main analysis, they provide useful checks. If time and resources allow, consider including them in the validation phase for a more comprehensive model assessment.
+
+---
+
+#### **8. Conclusion**
+
+This progressive analysis has identified the optimal sample sizes for hyperparameter tuning in the BI Auto models. A 10% sample size was first used to gain insights into the tuning parameters for the probability model, followed by a 20% sample size for the main tuning process for both the probability and severity models. These recommendations balance the need for computational efficiency with the goal of maintaining high model accuracy and minimized prediction errors. The normalized RMSE and MAE analyses further support these findings, ensuring that the selected sample sizes capture the key patterns in the data effectively.
+
+This approach should guide efficient and effective hyperparameter tuning, ensuring robust and reliable model performance across different use cases. The strategy of using 10% for initial parameter insights followed by 20% for final tuning provides a practical pathway to achieve both efficiency and accuracy in model development.
