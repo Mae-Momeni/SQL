@@ -1,95 +1,31 @@
-### **Report on Progressive Analysis of Model Accuracy and RMSE with Sampled Data**
+The plot you've provided shows the performance of your XGBoost model under different hyperparameter settings. Here's a breakdown of how to interpret it:
 
----
+### Parameters:
+1. **Shrinkage (eta)**: The plot panels are organized by different values of the learning rate (`shrinkage` or `eta`), with values of 0.6, 0.8, 1.0, and 1.4.
+2. **Max Tree Depth**: The different colored lines within each panel represent varying `max_depth` values for the trees (3, 6, and 9).
+3. **Boosting Iterations**: The x-axis represents the number of boosting iterations.
 
-#### **1. Problem Statement**
+### Insights:
+1. **Shrinkage (eta)**:
+   - **Lower Shrinkage (eta)** values (0.6 and 0.8) generally provide more stable models across boosting iterations. These models tend to have a more gradual decrease in performance, showing that the models are less prone to overfitting.
+   - **Higher Shrinkage (eta)** values (1.0 and 1.4) lead to sharper performance spikes, often followed by a decline, suggesting the model might be overfitting at a faster rate.
 
-In the context of building and fine-tuning predictive models for BI Auto, our goal is to optimize model performance while balancing computational efficiency. Given the large dataset size, it is impractical to use the entire dataset for every phase of model training and tuning. Therefore, determining an appropriate sampling percentage that ensures both accuracy and efficiency is critical.
+2. **Max Tree Depth**:
+   - Similar to the previous plot, deeper trees (`max_depth` of 9) tend to overfit more quickly, especially with higher `eta` values, as indicated by the sharp declines in accuracy after a certain number of boosting iterations.
+   - Shallower trees (`max_depth` of 3 or 6) provide more stable and consistent performance, particularly with lower `eta` values. This is evident from the relatively stable lines in the lower panels (for `eta = 0.6` and `eta = 0.8`).
 
----
+3. **Boosting Iterations**:
+   - Models with lower `eta` values tend to improve slowly over more boosting iterations and maintain stability without significant drops, indicating better generalization.
+   - As the number of boosting iterations increases, particularly beyond 100 iterations, higher `eta` values (1.0 and 1.4) show a clear tendency to overfit, especially for deeper trees.
 
-#### **2. Objective**
+### Recommendations:
+- **Shrinkage (eta)**: Lower values of `eta` (0.6 or 0.8) seem to yield more stable and potentially better generalizing models, particularly when combined with a moderate `max_depth` of 3 or 6.
+- **Max Depth**: A `max_depth` of 3 or 6 should be preferred over 9, especially at higher boosting iterations, to avoid overfitting.
+- **Boosting Iterations**: Consider using early stopping or limiting the number of boosting iterations, particularly when using higher `eta` values, to prevent overfitting. 
 
-The primary objective of this analysis is to identify the optimal sampling percentage of the dataset for two key models:
-1. **Probability Model:** Focused on predicting the likelihood of certain outcomes.
-2. **Severity Model:** Aimed at estimating the magnitude of those outcomes using RMSE as a performance metric.
+### Actionable Steps:
+- Choose an `eta` around 0.6 to 0.8 and `max_depth` of 3 or 6.
+- Apply early stopping to determine the optimal number of boosting iterations based on validation performance.
+- If using higher `eta`, monitor overfitting closely and potentially reduce the number of boosting iterations or regularize the model further.
 
-This analysis aims to establish a sampling strategy that achieves high model accuracy and minimized RMSE, while also considering computational constraints.
-
----
-
-#### **3. Assumptions**
-
-- **Train/Test/Validation Split:** The dataset was split into 65% training, 15% testing, and 20% validation.
-- **Random Sampling:** A single random sampling approach was used for each observation. Although there might be a randomness impact, it is expected to be negligible due to the large dataset size.
-
----
-
-#### **4. Methodology**
-
-**Progressive Sampling Approach:**
-- **Accuracy of Probability Model:** The accuracy was measured across different sampling percentages (ranging from small samples to the full dataset) to observe how accuracy stabilizes as more data is included.
-- **RMSE of Severity Model:** The RMSE was similarly analyzed across varying sample sizes to determine the point at which RMSE stabilizes, indicating sufficient data for reliable model performance.
-
-**Secondary Analysis:**
-- **Normalized RMSE and MAE (Severity Model):** These metrics were calculated to provide additional insights, focusing on a normalized version of RMSE (divided by the mean value of actual observations) and MAE to compare error magnitudes at different sampling levels.
-
----
-
-#### **5. Progressive Analysis Results**
-
-##### **5.1. Accuracy of the Probability Model**
-- **Observations:**
-  - The accuracy stabilizes quickly, with significant improvements observed up to approximately 10% of the dataset.
-  - Beyond 10%, the accuracy curve flattens, indicating diminishing returns from adding more data.
-
-- **Key Insight:**
-  - A sample size of around 10% appears to be sufficient to capture the essential patterns in the data for the probability model, making it a strong candidate for hyperparameter tuning with minimal loss in accuracy.
-
-##### **5.2. RMSE of the Severity Model**
-- **Observations:**
-  - The RMSE decreases sharply with increased sampling up to around 20%, after which the improvements become marginal.
-  - Beyond 20%, the RMSE stabilizes, indicating that additional data contributes little to further reducing prediction errors.
-
-- **Key Insight:**
-  - A sample size of 20% is recommended for the severity model, as this size balances RMSE reduction with computational efficiency.
-
-##### **5.3. Secondary Analysis: Normalized RMSE and MAE (Severity Model)**
-- **Normalized RMSE and MAE:** Both metrics displayed stabilization trends similar to the primary RMSE analysis, with the normalized RMSE fluctuating within a range of -1.5% to +0.5%. This further confirms that 10-20% sampling captures the critical aspects of the data.
-- **Importance:** While these metrics are less critical than the primary analysis, they provide additional confidence in the selected sample size range.
-
----
-
-#### **6. Results Discussion**
-
-**Accuracy of Probability Model:**
-- The rapid stabilization of accuracy at around 10% suggests that this sample size is adequate for the probability model. Using a smaller sample (5-10%) can still yield high accuracy, making it a viable option for hyperparameter tuning where efficiency is prioritized.
-
-**RMSE of Severity Model:**
-- The RMSE stabilizes around 20%, indicating that this sample size is optimal for capturing the necessary variance in the data to accurately model severity. Smaller samples might result in underfitting, while larger samples offer minimal gains in error reduction.
-
-**Secondary Metrics:**
-- The normalized RMSE and MAE support the findings of the primary analysis, with both metrics showing stability in the 10-20% sampling range. This reinforces the decision to use these sample sizes for different aspects of model tuning.
-
----
-
-#### **7. Recommendations**
-
-1. **Primary Recommendation - 10% Sample Size for Initial Insights on Probability Model:**
-   - **Efficiency and Accuracy:** Use 10% of the dataset to gain initial insights into tuning parameters for the probability model. This provides a good balance between accuracy and computational efficiency.
-
-2. **Primary Recommendation - 20% Sample Size for Main Tuning of Both Models:**
-   - **Probability Model:** After gaining insights with 10% sampling, use 20% of the dataset for the main tuning process to ensure the probability model is robust and well-tuned.
-   - **Severity Model:** Similarly, use a 20% sample size for tuning the severity model to optimize RMSE while managing computational resources.
-   - **Validation:** For both models, validate the final tuned models on a larger dataset to ensure they generalize well to the full dataset.
-
-3. **Consideration of Secondary Metrics:**
-   - While the normalized RMSE and MAE are secondary to the main analysis, they provide useful checks. If time and resources allow, consider including them in the validation phase for a more comprehensive model assessment.
-
----
-
-#### **8. Conclusion**
-
-This progressive analysis has identified the optimal sample sizes for hyperparameter tuning in the BI Auto models. A 10% sample size was first used to gain insights into the tuning parameters for the probability model, followed by a 20% sample size for the main tuning process for both the probability and severity models. These recommendations balance the need for computational efficiency with the goal of maintaining high model accuracy and minimized prediction errors. The normalized RMSE and MAE analyses further support these findings, ensuring that the selected sample sizes capture the key patterns in the data effectively.
-
-This approach should guide efficient and effective hyperparameter tuning, ensuring robust and reliable model performance across different use cases. The strategy of using 10% for initial parameter insights followed by 20% for final tuning provides a practical pathway to achieve both efficiency and accuracy in model development.
+These insights should help you fine-tune your XGBoost model for better performance.
