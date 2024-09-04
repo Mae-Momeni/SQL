@@ -1,11 +1,25 @@
-To bypass the issue of randomness in parallel processing for now, you can take the following steps:
+Even after disabling parallel processing, a small amount of randomness may still persist in certain functions or packages, including:
 
-### **1. Disable Parallel Processing Temporarily**
-For now, you can disable parallel processing altogether, allowing the entire grid search and cross-validation to run on a single thread. This ensures that the random seed set earlier in the script applies to all steps consistently. To do this:
+1. **XGBoost's Internal Randomness:** Even with `allowParallel = FALSE`, some functions inside `xgboost` still use random processes internally (e.g., subsampling, row/column shuffling). While setting a seed should minimize randomness, some operations may not fully respect the global seed.
 
-- When defining `trainControl`, set `allowParallel = FALSE`. This will stop any parallel processing and should make the results reproducible across runs.
+2. **Cross-validation Splits:** Despite setting a seed, the process of splitting data into cross-validation folds can sometimes introduce subtle differences if the same data is being partitioned slightly differently due to ties or other subtle reasons.
+
+### To Further Ensure Consistency:
+
+Here are a few additional steps you can take:
+
+### **1. Set a Global Seed at the Start**
+Ensure that a global seed is set at the very beginning of your script, and don’t reset it anywhere else (unless explicitly needed):
 
 ```r
+set.seed(123)
+```
+
+### **2. Set a Seed Inside `trainControl`**
+Although `trainControl` doesn’t allow setting seeds directly inside it, you can force the seed before the `train()` call, as you’re already doing. To ensure consistent fold splitting, use the following approach:
+
+```r
+set.seed(123)
 fit_contrl <- trainControl(search = "grid", 
                            verboseIter = TRUE, 
                            method = "cv", 
@@ -14,90 +28,78 @@ fit_contrl <- trainControl(search = "grid",
                            allowParallel = FALSE)
 ```
 
-This ensures that the random seed is applied correctly without interference from multiple parallel threads.
-
-### **2. Manually Set a Seed Before Each Fold**
-You can manually set a seed before each fold of cross-validation within your grid search process. This would involve setting a seed right before the training loop and making sure it remains consistent.
-
-For example, right before calling the `train()` function:
+### **3. Control XGBoost’s Randomness Explicitly**
+XGBoost allows you to set the seed for its internal processes. You can add a seed parameter in the `train` call under the `tuneGrid`:
 
 ```r
-set.seed(123)
-mod_sev_auto_indemnity <- train(
-  as.formula(formula),
-  data = data_train,
-  method = "xgbTree",
-  trControl = fit_contrl,
-  objective = "reg:squarederror",
-  tuneGrid = tuneGrid,
-  nthread = num_threads,
-  verbose = 1,
-  print_every_n = 1
+tuneGrid <- expand.grid(
+  nrounds = c(100:250),
+  max_depth = c(8, 9, 10),
+  eta = c(0.04, 0.05, 0.06),
+  gamma = c(0.55, 0.60),
+  colsample_bytree = c(0.55, 0.60),
+  min_child_weight = c(1, 11),
+  subsample = c(1),
+  seed = 123  # Add seed here for XGBoost's internal processes
 )
 ```
 
-This will ensure that the seed remains consistent within each iteration of the grid search and cross-validation.
-
-### **3. Set a Seed for Each Cross-Validation Fold**
-Another option is to set a seed before each fold within your cross-validation. Although not perfect, this ensures that each fold runs with a fixed seed. You can modify the `trainControl` function by introducing a manual loop that handles seeds:
+Additionally, you can also use the `xgb_train` function from `xgboost` and set `seed` directly if you’re using `xgb.cv()` or `xgb.train()`:
 
 ```r
-for (i in 1:number_cv) {
-  set.seed(123 + i)  # Different seed for each fold
-  mod_sev_auto_indemnity <- train(
-    as.formula(formula),
-    data = data_train,
-    method = "xgbTree",
-    trControl = fit_contrl,
-    objective = "reg:squarederror",
-    tuneGrid = tuneGrid,
-    nthread = num_threads,
-    verbose = 1,
-    print_every_n = 1
-  )
-}
+xgb_model <- xgboost(data = data_train, 
+                     max_depth = 6, 
+                     eta = 0.1, 
+                     nrounds = 100, 
+                     subsample = 0.7, 
+                     colsample_bytree = 0.8, 
+                     seed = 123)
 ```
 
-### **4. Switch to a Controlled Parallel Backend**
-If you want to continue using parallel processing, you can use packages like `doParallel` along with `foreach` and specify a consistent random seed for each parallel task.
+### **4. Ensure No Additional Seed Resets**
+Double-check that no other functions or calls reset the random seed anywhere in your code. Setting the seed multiple times in different parts of the script can cause inconsistent results.
 
-Here’s an example to use `doParallel` for controlled parallel execution:
+### **5. Replicate Results with the Same Environment**
+Different software or package versions (e.g., `xgboost` version differences) might cause slight variability. If you're still seeing differences despite everything else, try ensuring that you and your team are using the same environment:
+
+- Same R version
+- Same version of `caret`, `xgboost`, and other libraries
+- Same operating system, if possible
+
+You can consider creating a reproducible environment with `renv` or Docker to lock down all dependencies.
+
+### **6. Disable GPU Acceleration (if applicable)**
+If your system is using GPU acceleration for XGBoost, it can introduce slight non-determinism. If this is a concern, ensure that the model runs in CPU mode.
 
 ```r
-library(doParallel)
-cl <- makeCluster(num_threads)
-registerDoParallel(cl)
+# Ensure you're not using the GPU-enabled XGBoost version.
+```
 
-# Run your train function with parallel support
+### **7. Verify CV Indexes**
+Finally, ensure that the cross-validation indexes are the same for each fold. If you are using `createFolds` or another custom fold generator, check that it's not introducing any subtle randomness. You could manually set the indexes and ensure they're consistently applied.
+
+```r
+indexes <- createFolds(data_train$target, k = 5)
 fit_contrl <- trainControl(search = "grid", 
                            verboseIter = TRUE, 
                            method = "cv", 
-                           number = number_cv, 
                            index = indexes, 
-                           allowParallel = TRUE)
-
-mod_sev_auto_indemnity <- train(
-  as.formula(formula),
-  data = data_train,
-  method = "xgbTree",
-  trControl = fit_contrl,
-  objective = "reg:squarederror",
-  tuneGrid = tuneGrid,
-  nthread = num_threads,
-  verbose = 1,
-  print_every_n = 1
-)
-
-stopCluster(cl)
+                           allowParallel = FALSE)
 ```
 
-With `doParallel`, you can also set a seed inside the parallel backend:
+### Conclusion
+With the steps above—setting a global seed, controlling XGBoost's internal randomness, ensuring consistency in cross-validation, and making sure no seeds are reset mid-script—you should achieve more consistent results.
 
-```r
-clusterSetRNGStream(cl, 123)  # Set seed for parallel workers
-```
 
-This ensures all workers run with the same random seed.
 
-### **Conclusion**
-For now, the easiest solution is to **disable parallel processing** by setting `allowParallel = FALSE` inside the `trainControl` function or manually set the seed right before model training. You can explore more advanced solutions, like controlled parallelism, when a more permanent fix is required.
+
+
+
+
+Here's the updated version incorporating your additional point:
+
+"While parallel processing introduces a small amount of randomness in the results, particularly in the reported metrics like accuracy or RMSE, this does not significantly impact the validity of the hyperparameter tuning process itself. The tuning process is designed to explore a wide parameter space and, with a sufficiently large dataset, the variability introduced by parallel processing is negligible. This randomness does not change the relative ranking of the models or the optimal set of hyperparameters found. In other words, although the exact metrics may vary slightly between runs, the best performing model will consistently emerge from the tuning process when the dataset is sufficiently large, as the small variations do not affect the overall learning patterns in the data.
+
+Moreover, as long as the observed metric during tuning with many combinations of grid search involving parallel processing is lower than the metric observed in tuning with just 2 nrounds and no other combination (likely using only one core), and higher than the baseline metric before tuning, we are fine. These comparisons ensure that the tuning process, even with the parallel processing variability, is still providing meaningful and improved results over simpler models and the untuned baseline."
+
+This captures the point that as long as the tuned models improve over the simple and baseline configurations, any variability caused by parallel processing is not a concern.
