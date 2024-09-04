@@ -1,34 +1,103 @@
-### **Note on Parallel Processing and Random Seed Issue in Model Tuning**
+To bypass the issue of randomness in parallel processing for now, you can take the following steps:
 
-#### **Overview**
-In addition to the random seed issue within the `create_index` function, another potential source of randomness comes from the use of parallel processing during model tuning. This can cause inconsistencies in model performance across runs, even when a random seed is set at the start of the script.
+### **1. Disable Parallel Processing Temporarily**
+For now, you can disable parallel processing altogether, allowing the entire grid search and cross-validation to run on a single thread. This ensures that the random seed set earlier in the script applies to all steps consistently. To do this:
 
-#### **Parallel Processing and Randomness**
-Parallel processing is often used in machine learning tasks to speed up computations, particularly when performing grid search or cross-validation. However, when multiple processes are run in parallel, managing randomness and ensuring reproducibility becomes more complex. Without properly controlling the seed within each parallel thread, different machines or environments might lead to different results, even when the same initial seed is used.
+- When defining `trainControl`, set `allowParallel = FALSE`. This will stop any parallel processing and should make the results reproducible across runs.
 
-### **Impact on Reproducibility**
-- **Inconsistent Results**: While parallel processing significantly speeds up tasks, it can introduce variability in the model’s output unless the random seed is correctly controlled across all parallel threads.
-- **Lack of Control**: If parallel threads are not consistently assigned the same random seed, the fold creation and model training across runs will vary, leading to irreproducible results.
+```r
+fit_contrl <- trainControl(search = "grid", 
+                           verboseIter = TRUE, 
+                           method = "cv", 
+                           number = number_cv, 
+                           index = indexes, 
+                           allowParallel = FALSE)
+```
 
-### **Best Practices for Handling Parallel Processing Randomness**
+This ensures that the random seed is applied correctly without interference from multiple parallel threads.
 
-1. **Set the Seed in Each Parallel Thread**:
-   Ensure that the random seed is set within each individual thread of the parallel process. This ensures that each parallel job gets the same random seed, leading to reproducible results across different runs.
+### **2. Manually Set a Seed Before Each Fold**
+You can manually set a seed before each fold of cross-validation within your grid search process. This would involve setting a seed right before the training loop and making sure it remains consistent.
 
-2. **Seed Inside Cross-Validation Function**:
-   If using parallel processing in combination with cross-validation (as in grid search for hyperparameter tuning), include the `set.seed()` function either within the `trainControl` or another relevant step that controls the cross-validation process for each fold in parallel threads.
+For example, right before calling the `train()` function:
 
-3. **Use Controlled Parallel Backend**:
-   Consider using a parallel backend (e.g., `doParallel` with `caret`) that supports controlled seed management across multiple threads. This allows you to maintain consistency even when tasks are distributed among multiple workers.
+```r
+set.seed(123)
+mod_sev_auto_indemnity <- train(
+  as.formula(formula),
+  data = data_train,
+  method = "xgbTree",
+  trControl = fit_contrl,
+  objective = "reg:squarederror",
+  tuneGrid = tuneGrid,
+  nthread = num_threads,
+  verbose = 1,
+  print_every_n = 1
+)
+```
 
-4. **Document and Monitor**:
-   Keep clear documentation of where and how seeds are set in the code, especially when using parallel processing. Additionally, ensure to monitor outputs for any signs of unexpected randomness during training.
+This will ensure that the seed remains consistent within each iteration of the grid search and cross-validation.
+
+### **3. Set a Seed for Each Cross-Validation Fold**
+Another option is to set a seed before each fold within your cross-validation. Although not perfect, this ensures that each fold runs with a fixed seed. You can modify the `trainControl` function by introducing a manual loop that handles seeds:
+
+```r
+for (i in 1:number_cv) {
+  set.seed(123 + i)  # Different seed for each fold
+  mod_sev_auto_indemnity <- train(
+    as.formula(formula),
+    data = data_train,
+    method = "xgbTree",
+    trControl = fit_contrl,
+    objective = "reg:squarederror",
+    tuneGrid = tuneGrid,
+    nthread = num_threads,
+    verbose = 1,
+    print_every_n = 1
+  )
+}
+```
+
+### **4. Switch to a Controlled Parallel Backend**
+If you want to continue using parallel processing, you can use packages like `doParallel` along with `foreach` and specify a consistent random seed for each parallel task.
+
+Here’s an example to use `doParallel` for controlled parallel execution:
+
+```r
+library(doParallel)
+cl <- makeCluster(num_threads)
+registerDoParallel(cl)
+
+# Run your train function with parallel support
+fit_contrl <- trainControl(search = "grid", 
+                           verboseIter = TRUE, 
+                           method = "cv", 
+                           number = number_cv, 
+                           index = indexes, 
+                           allowParallel = TRUE)
+
+mod_sev_auto_indemnity <- train(
+  as.formula(formula),
+  data = data_train,
+  method = "xgbTree",
+  trControl = fit_contrl,
+  objective = "reg:squarederror",
+  tuneGrid = tuneGrid,
+  nthread = num_threads,
+  verbose = 1,
+  print_every_n = 1
+)
+
+stopCluster(cl)
+```
+
+With `doParallel`, you can also set a seed inside the parallel backend:
+
+```r
+clusterSetRNGStream(cl, 123)  # Set seed for parallel workers
+```
+
+This ensures all workers run with the same random seed.
 
 ### **Conclusion**
-While parallel processing offers significant performance benefits, it introduces additional complexity when it comes to reproducibility. Proper seed management at both the global level and within parallel threads is crucial to ensure consistent model results. 
-
-By following the above best practices, the team can leverage the speed of parallel processing without sacrificing the reproducibility of results.
-
----
-
-This note highlights the importance of handling randomness in parallel processing for model tuning and offers practical steps to ensure consistent results across runs.
+For now, the easiest solution is to **disable parallel processing** by setting `allowParallel = FALSE` inside the `trainControl` function or manually set the seed right before model training. You can explore more advanced solutions, like controlled parallelism, when a more permanent fix is required.
