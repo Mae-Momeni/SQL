@@ -1,42 +1,32 @@
-Tuning with 3 levels for each parameter and using a broad range for `nrounds` in one large run might not always be a good idea for several reasons, especially in the context of complex models like XGBoost. Here are the key points:
+### **Analysis of RMSE and Normalized RMSE Results with Business Context**
 
-### 1. **Complexity and Interaction Effects**:
-   - **Parameter interactions**: In models like XGBoost, parameters often interact with each other in complex ways. When tuning many parameters simultaneously with multiple levels, you increase the number of combinations exponentially. While you’re covering a broader range, many combinations may interact poorly, leading to suboptimal results.
-   - **Diluting optimal results**: By testing many combinations at once, the model may converge on an average or suboptimal combination rather than discovering the truly best configuration. Some parameters might offset or cancel out the benefits of others.
+This analysis evaluates the performance of various versions of the predictive claim reserve model using RMSE and normalized RMSE values, while keeping in mind the business decision to remove two variables and switch to more recent data (v3). The removal of these variables aims to decouple dependencies in the model, with the understanding that performance might decrease but business value could still be enhanced.
 
-### 2. **Overfitting or Underfitting**:
-   - **Risk of overfitting**: A broad range for `nrounds` combined with multiple parameter levels can increase the risk of overfitting, particularly if the model is tested on a limited dataset. If too many trees (boosting iterations) are tested with aggressive settings (e.g., high `max_depth`, low `min_child_weight`), the model can capture noise, which leads to poor generalization.
-   - **Risk of underfitting**: On the flip side, setting overly conservative parameters (e.g., too low `nrounds` or `eta`) can lead to underfitting, where the model is too simplistic to capture the underlying data patterns effectively.
+### 1. **Auto Indemnity**:
+   - **Performance Impact**: RMSE increases from **74,167 (v2 model with v2 data)** to **87,495 (v3 model without 2 variables, v3 data)**. The normalized RMSE similarly rises from **1.42** to **2.17**. After tuning, the RMSE improves slightly to **86,909**, but the performance remains worse than in the v2 version.
+   - **Business Consideration**: Despite the performance drop, removing the two variables likely decouples some dependencies within the model. Tuning improves RMSE slightly, suggesting the model may still be effective in terms of business logic, even with a slight sacrifice in predictive accuracy.
 
-### 3. **Computational Inefficiency**:
-   - **Exponential search space**: With multiple parameters having three levels each, the search space grows exponentially. For instance, tuning 7 parameters (like `nrounds`, `max_depth`, `eta`, `gamma`, `colsample_bytree`, `min_child_weight`, and `subsample`) with 3 levels each results in **3^7 = 2,187** different combinations. This makes the grid search much larger and more computationally expensive, often without yielding better results.
-   - **Broad `nrounds` range**: When testing a wide range for `nrounds`, the model might explore values that are either too low or too high. This leads to unnecessary iterations that either don’t add value (underfitting due to too few iterations) or risk overfitting (too many iterations), wasting computational resources.
+### 2. **Commercial Indemnity**:
+   - **Performance Impact**: RMSE improves significantly from **73,799 (v2 data)** to **60,238 (v3 model without 2 variables, v3 data)**. The normalized RMSE also improves from **2.50** to **2.41**. Further tuning brings the RMSE down slightly to **59,927**.
+   - **Business Consideration**: This sub-model shows a clear improvement when using v3 data, and the removal of the two variables does not negatively impact performance. This indicates that the model not only benefits from the new data but also works well without the two variables, aligning with business objectives without performance degradation.
 
-### 4. **Gradient Boosting Models Prefer Iterative Fine-Tuning**:
-   - **XGBoost and boosting models** are inherently iterative in nature, meaning small adjustments in key parameters like `nrounds`, `eta`, and `max_depth` can drastically affect model performance. It’s often more effective to fine-tune these parameters iteratively, refining the best combination found in previous runs rather than doing a broad sweep of parameter ranges at once.
-   - **Local optimality**: In many cases, focusing on narrow ranges around well-performing parameters allows for better fine-tuning. A large, unfocused grid search can miss these local optima.
+### 3. **Habit Farm**:
+   - **Performance Impact**: RMSE improves from **94,679 (v2 data)** to **85,601 (v3 model without 2 variables, v3 data)**, although performance declines slightly when removing the two variables (from **81,762** with them). After tuning, RMSE slightly improves to **85,457**.
+   - **Business Consideration**: While removing the two variables leads to a minor increase in RMSE, the model's performance is still better than in the v2 version. This makes the trade-off reasonable in light of the business goal, and tuning helps mitigate the performance decline.
 
-### 5. **Risk of Non-Optimal Exploration**:
-   - **Exploring a broad range at once may overlook smaller optimizations**. For example, if `nrounds = 100` performs well in one run but is offset by poor `eta` or `max_depth` combinations, the grid search might fail to identify `nrounds = 100` as the best choice. Fine-tuning around a smaller, focused range ensures that interactions between critical parameters are well-explored.
-   
-### 6. **More Targeted Tuning is Often Better**:
-   - **Focused searches**: Narrowing down ranges based on previous insights allows you to explore more meaningful combinations without getting lost in a sea of suboptimal results. For example, tuning `eta`, `nrounds`, and `max_depth` together within smaller, targeted ranges ensures that you’re honing in on the most effective combinations rather than testing configurations that are likely to fail.
-   - **Sequential approach**: It's often more productive to tune one or two key parameters at a time (e.g., `max_depth` and `nrounds`), refine them, and then move on to others (e.g., `gamma`, `subsample`). This way, you can progressively improve model performance without the noise from too many simultaneous changes.
+### 4. **Legal**:
+   - **Performance Impact**: RMSE increases dramatically from **19,827 (v2 data)** to **36,069 (v3 model without 2 variables, v3 data)**, and tuning offers no further improvement. Normalized RMSE follows a similar pattern, rising from **1.02** to **1.16**.
+   - **Business Consideration**: The significant performance degradation suggests that the two removed variables were critical for this sub-model. The business benefit of decoupling dependencies may not justify the sharp decline in accuracy. More focused tuning or reintroducing some variables may be necessary.
 
-### Example of an Inefficient Broad Search:
-If you set **`nrounds`** from 10 to 100 with wide ranges for other parameters (e.g., `max_depth` = 5, 10, 15, `eta` = 0.01, 0.1, 0.2), you might end up testing extreme configurations like:
-- `nrounds = 100` and `max_depth = 15` and `eta = 0.2`, which could lead to overfitting.
-- `nrounds = 10` and `max_depth = 5` and `eta = 0.01`, which may result in underfitting.
+### 5. **Other Expenses**:
+   - **Performance Impact**: RMSE increases sharply from **3,391 (v2 data)** to **7,218 (v3 model without 2 variables, v3 data)**, and tuning provides no significant improvement. The normalized RMSE increases from **1.86** to **2.29**.
+   - **Business Consideration**: This sub-model suffers from a large drop in accuracy, similar to the Legal sub-model. The removal of the two variables significantly impacts performance, and further optimization efforts may be needed to balance business needs and model accuracy.
 
-These extremes may cancel out the benefits of more optimal combinations that are in between, giving you suboptimal results.
+---
 
-### Recommendations:
+### **Overall Conclusion**:
+- **Sub-models like Commercial Indemnity** and **Habit Farm** benefit from the switch to v3 data and handle the removal of the two variables well, making them good examples of success where the business objective aligns with the model's performance.
+- **Auto Indemnity** shows a performance decline, but the business goal of decoupling dependencies might still be achievable, with some recovery possible through tuning.
+- **Legal** and **Other Expenses** experience a sharp decline in performance after the removal of variables, suggesting that the business benefit of decoupling might not be worth the loss in accuracy. Further tuning or a partial reintroduction of variables might be necessary for these sub-models.
 
-1. **Refine One or Two Parameters at a Time**: After identifying the best performing range for `nrounds`, you could tune `max_depth` and `eta` in a smaller, more focused range. Then, move on to other parameters like `gamma` and `min_child_weight` with a similar approach.
-
-2. **Narrow the `nrounds` Range**: Once you’ve identified a solid range (e.g., 15 to 25 rounds), stick to it rather than testing extremes like 10 or 100 rounds, which may skew results.
-
-3. **Iterative Tuning**: Gradually narrow down parameters like `eta`, `max_depth`, and `min_child_weight` with tighter, iterative tuning based on previous insights. This ensures you are zooming in on the most effective combinations, without introducing unnecessary noise.
-
-### Conclusion:
-Using broad ranges with 3 levels for each parameter in one large run can lead to poor interactions, suboptimal results, and computational inefficiency. A more focused, iterative tuning strategy will likely yield better results by progressively honing in on the best combination of parameters while avoiding overfitting or underfitting.
+In summary, the overall approach is beneficial for some sub-models but requires further evaluation and tuning for others to balance business goals with predictive performance.
