@@ -1,32 +1,159 @@
-### **Analysis of RMSE and Normalized RMSE Results with Business Context**
+Thanks for sharing the table. Based on the data you provided, I will analyze the performance comparison of the different versions of the model for each sub-model:
 
-This analysis evaluates the performance of various versions of the predictive claim reserve model using RMSE and normalized RMSE values, while keeping in mind the business decision to remove two variables and switch to more recent data (v3). The removal of these variables aims to decouple dependencies in the model, with the understanding that performance might decrease but business value could still be enhanced.
+### 1. **Auto Indemnity**
+- The RMSE and normalized RMSE for the **v2 model** used to score v3 data are quite high (92,072 RMSE and 2.28 normalized RMSE).
+- **v3 model trained on v3 data** shows a significant improvement, reducing the RMSE to 85,238 and normalized RMSE to 2.11.
+- **v3 model without 2 variables trained on v3 data** further reduces the RMSE to 87,495 and normalized RMSE to 2.17, which indicates a slight increase in RMSE compared to the previous v3 model.
+- **v3 model without 2 variables tuned and trained on v3 data** brings the RMSE down to 86,909 and normalized RMSE to 2.15, showing the tuning helped regain some of the lost performance after removing the variables.
 
-### 1. **Auto Indemnity**:
-   - **Performance Impact**: RMSE increases from **74,167 (v2 model with v2 data)** to **87,495 (v3 model without 2 variables, v3 data)**. The normalized RMSE similarly rises from **1.42** to **2.17**. After tuning, the RMSE improves slightly to **86,909**, but the performance remains worse than in the v2 version.
-   - **Business Consideration**: Despite the performance drop, removing the two variables likely decouples some dependencies within the model. Tuning improves RMSE slightly, suggesting the model may still be effective in terms of business logic, even with a slight sacrifice in predictive accuracy.
-
-### 2. **Commercial Indemnity**:
-   - **Performance Impact**: RMSE improves significantly from **73,799 (v2 data)** to **60,238 (v3 model without 2 variables, v3 data)**. The normalized RMSE also improves from **2.50** to **2.41**. Further tuning brings the RMSE down slightly to **59,927**.
-   - **Business Consideration**: This sub-model shows a clear improvement when using v3 data, and the removal of the two variables does not negatively impact performance. This indicates that the model not only benefits from the new data but also works well without the two variables, aligning with business objectives without performance degradation.
-
-### 3. **Habit Farm**:
-   - **Performance Impact**: RMSE improves from **94,679 (v2 data)** to **85,601 (v3 model without 2 variables, v3 data)**, although performance declines slightly when removing the two variables (from **81,762** with them). After tuning, RMSE slightly improves to **85,457**.
-   - **Business Consideration**: While removing the two variables leads to a minor increase in RMSE, the model's performance is still better than in the v2 version. This makes the trade-off reasonable in light of the business goal, and tuning helps mitigate the performance decline.
-
-### 4. **Legal**:
-   - **Performance Impact**: RMSE increases dramatically from **19,827 (v2 data)** to **36,069 (v3 model without 2 variables, v3 data)**, and tuning offers no further improvement. Normalized RMSE follows a similar pattern, rising from **1.02** to **1.16**.
-   - **Business Consideration**: The significant performance degradation suggests that the two removed variables were critical for this sub-model. The business benefit of decoupling dependencies may not justify the sharp decline in accuracy. More focused tuning or reintroducing some variables may be necessary.
-
-### 5. **Other Expenses**:
-   - **Performance Impact**: RMSE increases sharply from **3,391 (v2 data)** to **7,218 (v3 model without 2 variables, v3 data)**, and tuning provides no significant improvement. The normalized RMSE increases from **1.86** to **2.29**.
-   - **Business Consideration**: This sub-model suffers from a large drop in accuracy, similar to the Legal sub-model. The removal of the two variables significantly impacts performance, and further optimization efforts may be needed to balance business needs and model accuracy.
+**Analysis**: The removal of 2 variables had a minor negative impact on RMSE, but tuning helped slightly improve performance, even if the overall improvement is small compared to the initial v3 model.
 
 ---
 
-### **Overall Conclusion**:
-- **Sub-models like Commercial Indemnity** and **Habit Farm** benefit from the switch to v3 data and handle the removal of the two variables well, making them good examples of success where the business objective aligns with the model's performance.
-- **Auto Indemnity** shows a performance decline, but the business goal of decoupling dependencies might still be achievable, with some recovery possible through tuning.
-- **Legal** and **Other Expenses** experience a sharp decline in performance after the removal of variables, suggesting that the business benefit of decoupling might not be worth the loss in accuracy. Further tuning or a partial reintroduction of variables might be necessary for these sub-models.
+### 2. **Commercial Indemnity**
+- In the **v2 model**, the RMSE is 110,147 and normalized RMSE is 4.41, which is very high.
+- The **v3 model trained on v3 data** makes a massive improvement, dropping the RMSE to 61,659 and normalized RMSE to 2.44.
+- With the removal of 2 variables, the **v3 model without 2 variables trained on v3 data** shows a slight increase in RMSE to 60,238 and normalized RMSE to 2.41.
+- After tuning, the **v3 model without 2 variables tuned and trained on v3 data** shows further improvement, reducing the RMSE to 59,927 and normalized RMSE to 2.40.
 
-In summary, the overall approach is beneficial for some sub-models but requires further evaluation and tuning for others to balance business goals with predictive performance.
+**Analysis**: The removal of variables and subsequent tuning slightly improve performance after retraining. Despite the increase in RMSE after the removal, tuning improved the RMSE to levels close to the original v3 model.
+
+---
+
+### 3. **Habit Farm**
+- The **v2 model** starts with an RMSE of 97,028 and normalized RMSE of 2.22.
+- The **v3 model trained on v3 data** performs better, reducing the RMSE to 81,762 and normalized RMSE to 1.96.
+- The removal of 2 variables in the **v3 model without 2 variables trained on v3 data** slightly increases the RMSE to 85,601 and normalized RMSE to 1.96.
+- Tuning in the **v3 model without 2 variables tuned and trained on v3 data** shows a small improvement, reducing the RMSE to 85,457 and normalized RMSE to 1.95.
+
+**Analysis**: The removal of variables slightly increased RMSE, but tuning helped recover some performance. However, the performance improvements after tuning are minimal.
+
+---
+
+### 4. **Legal**
+- The **v2 model** shows an RMSE of 37,247 and normalized RMSE of 1.20.
+- The **v3 model trained on v3 data** improves significantly, reducing RMSE to 35,743 and normalized RMSE to 1.16.
+- After removing 2 variables, the **v3 model without 2 variables trained on v3 data** slightly improves the RMSE to 36,069, but the normalized RMSE remains 1.16.
+- Tuning in the **v3 model without 2 variables tuned and trained on v3 data** makes no additional improvements, keeping RMSE and normalized RMSE at the same values as before tuning.
+
+**Analysis**: The Legal sub-model shows minimal change after tuning and variable removal. The removal of variables did not have much impact, and the tuning did not provide further improvements.
+
+---
+
+### 5. **Other Expenses**
+- The **v2 model** has an RMSE of 7,446 and normalized RMSE of 2.36.
+- The **v3 model trained on v3 data** shows improvement, reducing RMSE to 7,169 and normalized RMSE to 2.22.
+- The **v3 model without 2 variables trained on v3 data** marginally increases RMSE to 7,205 and normalized RMSE to 2.28.
+- After tuning, the **v3 model without 2 variables tuned and trained on v3 data** slightly increases RMSE to 7,218 and normalized RMSE to 2.29.
+
+**Analysis**: The removal of 2 variables and subsequent tuning did not significantly improve or degrade the model’s performance in the Other Expenses sub-model. The changes are marginal, and tuning has not reversed the slight performance decline after variable removal.
+
+---
+
+### Overall Summary:
+- In general, **v3 models (with and without variables removed)** show significant improvements over the **v2 model** in terms of RMSE and normalized RMSE for most sub-models.
+- The **removal of 2 variables** slightly worsened performance in some cases (e.g., Habit Farm, Auto Indemnity), but after **tuning**, the performance either returned to close to previous levels or slightly improved.
+- The **Legal** and **Other Expenses** sub-models saw little to no change after the removal of variables and tuning, indicating that those two features likely had minimal impact on these sub-models.
+  
+In conclusion, the overall performance of the **v3 model** is better than the **v2 model**, despite some trade-offs in RMSE after removing the variables. The tuning process slightly improved the performance in most sub-models after variable removal, aligning the performance closer to that of the initial v3 model trained on all variables.
+
+
+
+
+
+Thank you for the updated image. Here’s how I will adjust the analysis and integrate the thoughts from the image into the report:
+
+### Additional Points:
+
+1. **Feature Selection**:
+   - Using all features can potentially enforce **overfitting**, as some features might introduce noise or irrelevant patterns into the model.
+   - When some features are **dropped**, they might still be needed in certain contexts or for specific sub-models, indicating a balance is necessary between feature selection and performance in the model.
+
+2. **Open RIs and Model Implications**:
+   - Open reserves (RIs) are **implicated with the last version of the model source**, meaning there might still be dependencies or business assumptions carried over from previous versions of the model that could influence performance or business decisions tied to reserve estimates.
+
+---
+
+### Updated Analysis (Including the New Points):
+
+The overall **v3 model** performance across sub-models is better than the **v2 model**, despite some trade-offs after removing variables. The **tuning** process helped recover some of the performance lost due to the removal of variables.
+
+1. **Legal Sub-Model**:
+   - RMSE variations in the Legal sub-model are influenced by **case complexity** and the length of development time. More complex legal cases can increase RMSE due to higher costs, making this sub-model particularly sensitive to feature changes and model retraining.
+
+2. **Habit/Farm Sub-Model**:
+   - In the Habit/Farm sub-model, the **number of cost categories** is a critical variable. This explains why the RMSE dropped more significantly when the two variables were removed. It suggests the model became more focused but also more sensitive to the interaction between cost categories.
+
+3. **Re-Training and v3 Data**:
+   - The model’s performance improved significantly when retrained on the more recent **v3 data**, highlighting the importance of using up-to-date data that reflects the latest business conditions.
+
+4. **Feature Selection Insights**:
+   - Careful feature selection helps avoid overfitting, especially in cases where **including all features** can introduce unwanted dependencies.
+   - When some features are **dropped**, their importance in certain contexts may still remain, so it’s essential to consider if they might be needed in future retraining efforts or for different sub-models.
+
+5. **Open Reserve Impute Implications**:
+   - **Open reserves** (RIs) are still influenced by the **last version of the model source**, meaning previous business assumptions and dependencies can affect the current model's performance and reserve estimates. Understanding these connections is key to aligning business decisions with model results.
+
+---
+
+Let me know if you'd like further adjustments or additional details!
+
+
+
+
+
+
+
+
+
+Based on the image provided, I will craft a report summarizing your analysis of the perceived discrepancy in model assessment results.
+
+---
+
+### **Report: Analysis of Perceived Discrepancy in Model Assessment Results**
+
+#### **1. Context**
+This analysis explores the perceived discrepancy between results from a **v3 model** before and after the removal of two variables. The model was trained and assessed on **v3 data** compared to the **v2 model** which was originally trained on **v2 data** and used for production. The goal was to investigate why the production model and new model results diverge, as well as explore other influencing factors.
+
+#### **2. Key Observations and Hypotheses**
+
+- **v3 Model Before Removing 2 Variables**:
+    - The expectation was that the production (v2) model and the new (v3) model should show similar results since both use the same data (v3). However, a noticeable discrepancy ranging from **300 to 50,000** was observed between these results.
+    
+    - **Seed Impact on Model Assessment**: 
+        - The influence of the random seed, which was not employed in the v2 model, was evaluated. The impact was estimated to range between **7 to 2,450**, depending on different test runs.
+        - **Conclusion**: The seed effect was determined not to be the primary reason for the discrepancy, as the differences were much larger than what could be attributed to the seed variability.
+
+#### **3. The Discrepancy Between v2 Model and v3 Model**
+
+- **Model Weight Changes**:
+    - The primary reason for the discrepancy lies in the fact that while the same variables and parameters are being used, the v3 model was retrained on different data (v3 data), whereas the production model was trained on v2 data.
+    - Since **v3 data** is a newer dataset, the **v2 model trained on v2 data** is fundamentally different in terms of its weights and learned patterns. This leads to different predictions.
+
+    - **Explanation**:
+        - The v2 model in production was originally trained on **v2 data**. When this model is scored using **v3 data**, its performance is impacted by the fact that the data it was trained on is now outdated or misaligned with the current dataset.
+        - On the other hand, the v3 model was specifically retrained on **v3 data**, leading to a better alignment with the latest patterns in the dataset and thus performing better.
+
+#### **4. Comparison of v2 and v3 Models**
+    
+- **Different Models Lead to Different Predictions**:
+    - The **v3 model** is expected to outperform the **v2 model** on **v3 data** because the model was trained on the same dataset that it was scored on.
+    - The **v2 model** has outdated weights, leading to a poorer performance when applied to the more recent v3 data.
+
+    - **Important Takeaway**: The **v3 model** is always expected to outperform the **v2 model** when scored on **v3 data**, as it captures the latest patterns in the dataset. The baseline comparison between v2 and v3 is thus skewed by the fact that they were trained on fundamentally different datasets.
+
+#### **5. Theoretical Implications**
+    
+- Running a model trained on **v2 data** with **v3 data** is not ideal from a theoretical standpoint. This scenario introduces potential biases, as the v2 model’s weights do not align with the latest data structure. Although useful as a quick reference to detect shifts in model performance, using such a setup may lead to misleading results.
+    - The v2 model scores shown in the comparison with v3 data are more of a **heads up** regarding how the model would behave if it was applied in production without retraining. However, it’s not a best practice to run a model on data it hasn’t been trained on.
+
+---
+
+### **Conclusion**
+The discrepancy in RMSE results between the **v2 production model** and the **v3 model** is primarily due to the **difference in training data**. While both models used the same variables and parameters, the data on which they were trained is different, and hence, the models learned different patterns. The results of the production model using v2 data are outdated and do not reflect the patterns present in the more recent v3 data.
+
+Moreover, while some of the variance could be attributed to seed effects, this was not the primary driver of the discrepancy. The underlying factor is that **v3 retraining aligned the model with current data**, resulting in improved performance and a better reflection of current business conditions.
+
+---
+
+Let me know if you would like to add or modify any sections in this report!
