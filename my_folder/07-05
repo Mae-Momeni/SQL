@@ -1,218 +1,53 @@
-Here's a concise **Git and Linux Command-Line Cheat Sheet** for your workflow, focusing on terminal usage for Git processes and useful Linux commands for working with repositories:
-
-### **Git Command Cheat Sheet:**
-
-1. **Cloning a Repository:**
-   ```bash
-   git clone <repository_url>
-   ```
-   Example:
-   ```bash
-   git clone https://github.com/user/repo.git
-   ```
-
-2. **Checking out a Branch:**
-   ```bash
-   git checkout <branch_name>
-   ```
-   Example:
-   ```bash
-   git checkout feature/new-feature
-   ```
-
-3. **Creating a New Branch and Checking it Out:**
-   ```bash
-   git checkout -b <new_branch_name>
-   ```
-   Example:
-   ```bash
-   git checkout -b feature/new-feature
-   ```
-
-4. **Viewing Branches:**
-   ```bash
-   git branch
-   ```
-   *To list remote branches as well:*
-   ```bash
-   git branch -a
-   ```
-
-5. **Pulling Changes from Remote:**
-   ```bash
-   git pull origin <branch_name>
-   ```
-   Example:
-   ```bash
-   git pull origin master
-   ```
-
-6. **Staging Changes (Add files to the staging area):**
-   ```bash
-   git add <file_path>
-   ```
-   Add all changes:
-   ```bash
-   git add .
-   ```
-
-7. **Committing Changes:**
-   ```bash
-   git commit -m "Your commit message"
-   ```
-
-8. **Pushing Changes to Remote:**
-   ```bash
-   git push origin <branch_name>
-   ```
-   Example:
-   ```bash
-   git push origin feature/new-feature
-   ```
-
-9. **Checking Status of Your Working Directory:**
-   ```bash
-   git status
-   ```
-
-10. **Viewing Logs (Commit history):**
-    ```bash
-    git log --oneline
-    ```
-
-11. **Merging Branches:**
-    Switch to the target branch (e.g., `main`) and run the merge:
-    ```bash
-    git checkout main
-    git merge <branch_name>
-    ```
-
-12. **Reverting Changes:**
-    Undo the last commit but keep the changes:
-    ```bash
-    git reset --soft HEAD~1
-    ```
-
-    Undo the last commit and remove changes:
-    ```bash
-    git reset --hard HEAD~1
-    ```
-
-13. **Deleting a Local Branch:**
-    ```bash
-    git branch -d <branch_name>
-    ```
-
-14. **Deleting a Remote Branch:**
-    ```bash
-    git push origin --delete <branch_name>
-    ```
+I can now view the report. Based on its contents, I will create a new version with a focus on comparing differences between the two models (v2 and v3) and emphasizing why retraining with new data is necessary.
 
 ---
 
-### **Linux Commands Cheat Sheet for Git Operations:**
+### **Comparison Report on v2 and v3 Models Using v3 Data**
 
-1. **Listing Files:**
-   ```bash
-   ls
-   ```
-   List with details:
-   ```bash
-   ls -al
-   ```
+#### **Context**:
+This report compares the performance of the **v2 model** using its original v2 data against the same model using the more recent **v3 data**, highlighting the need for retraining when data is updated. The comparison aims to show how shifts in data affect model performance and why re-training is essential to maintain accuracy and business relevance.
 
-2. **Changing Directory:**
-   ```bash
-   cd <directory_path>
-   ```
-   Example:
-   ```bash
-   cd /home/user/projects/
-   ```
+#### **Key Observations**:
 
-3. **Creating a New Directory:**
-   ```bash
-   mkdir <directory_name>
-   ```
+1. **Discrepancy in RMSE**:
+   - The expectation was that the v2 model using v2 data would perform similarly to the same v2 model with v3 data. However, a **discrepancy of 300 to 50,000 in RMSE** was observed when comparing results across sub-models.
+   - This suggests that simply using more recent data without retraining the model leads to significant performance differences.
 
-4. **Copying Files:**
-   ```bash
-   cp <source> <destination>
-   ```
-   Example:
-   ```bash
-   cp file.txt /backup/file.txt
-   ```
+2. **Seed Impact**:
+   - A review of the random seed used for reproducibility showed that its influence on the results was minimal. The variance caused by seed effects ranged from **7 to 2,450**, far smaller than the overall discrepancy in RMSE.
+   - **Conclusion**: Seed variability was ruled out as the primary cause of the performance drop.
 
-5. **Moving/Renaming Files:**
-   ```bash
-   mv <source> <destination>
-   ```
+#### **Comparison Between v2 and v3 Data**:
 
-6. **Removing Files and Directories:**
-   Remove a file:
-   ```bash
-   rm <file_name>
-   ```
-   Remove a directory (recursively):
-   ```bash
-   rm -r <directory_name>
-   ```
+1. **Weight and Model Adjustment**:
+   - The main reason for the performance differences lies in the fact that the v2 model was **trained on v2 data**, while the more recent data (v3) reflects updated patterns, trends, and distributions. Since the model trained on v2 data is not adapted to the new data's characteristics, it produces inaccurate predictions.
+   - **Explanation**:
+     - When the v2 model was originally trained, it learned the patterns present in the v2 data. The introduction of v3 data, which is more recent and developed, means the model is now misaligned with the latest trends, leading to reduced performance.
+     - The **v3 model**, however, is retrained using v3 data, ensuring better alignment with the updated patterns, leading to more accurate results.
 
-7. **Viewing Contents of a File:**
-   ```bash
-   cat <file_name>
-   ```
-   For large files:
-   ```bash
-   less <file_name>
-   ```
+2. **Different Predictions**:
+   - The v2 model, when applied to v3 data without retraining, performs poorly because it still carries the learned weights and biases from v2 data. This leads to **misaligned predictions** with v3 data.
+   - Retraining the model on v3 data allows it to learn the latest relationships and trends, making the predictions more accurate.
 
-8. **Checking Disk Usage:**
-   ```bash
-   df -h
-   ```
+#### **Conclusion**:
 
-9. **Checking Free Memory:**
-   ```bash
-   free -h
-   ```
+- The key factor behind the discrepancy is the difference in training data. Although the model’s structure and parameters remained the same, the **patterns learned from v2 data** do not reflect those in the more recent v3 data. This is why retraining on v3 data is essential.
+- **Seed effects** were shown to have minimal impact, indicating that retraining is necessary even without accounting for small random variances.
+- When moving from v2 to v3 data, the model needs to be retrained to align with the updated business environment and patterns. Without retraining, models like **Auto Indemnity** and **Farm/Habit** will likely experience similar performance issues as observed.
 
-10. **Checking Process Usage:**
-    ```bash
-    top
-    ```
+#### **Key Takeaways**:
+1. **Importance of Retraining**:
+   - Retraining on more recent data (v3) allows the model to adjust to new trends, distributions, and data relationships, improving accuracy. Without this, predictions become outdated, even if the model structure remains unchanged.
+   
+2. **Performance Shifts**:
+   - Sub-models such as **Legal** and **Other Expenses** perform significantly worse when the v2 model is applied to v3 data, emphasizing the need for retraining.
+   - **Commercial Indemnity** shows relatively stable results but still benefits from retraining to capture recent trends.
 
-11. **Searching Files/Content:**
-    Find files:
-    ```bash
-    find <directory> -name <file_name>
-    ```
-    Example:
-    ```bash
-    find . -name "*.R"
-    ```
+3. **Business Relevance**:
+   - Given that the business environment and claims evolve over time, it's essential to have a plan in place to regularly update and **retrain models** with new data. This ensures that predictions remain accurate and aligned with the latest business conditions.
 
-    Search content within files:
-    ```bash
-    grep -r "<pattern>" <directory>
-    ```
-
-12. **Viewing Environment Variables:**
-    ```bash
-    printenv
-    ```
-
-13. **Setting Environment Variables (temporarily):**
-    ```bash
-    export VARIABLE_NAME=value
-    ```
-
-14. **Checking Running Git Processes:**
-    ```bash
-    ps aux | grep git
-    ```
+By regularly updating and retraining models, businesses can maintain high accuracy in their predictive modeling processes, particularly in dynamic environments like insurance claims, where trends change over time.
 
 ---
 
-By following this cheat sheet, you'll be able to manage your repositories effectively via the terminal and navigate your Linux environment for Git-related tasks.
+Let me know if you would like further adjustments!
