@@ -1,17 +1,25 @@
-It seems you are referring to a note or an issue regarding how to avoid data quality and validation issues in a pipeline, particularly for model development. Based on the image you provided, here's a summary of what the note is discussing:
+bi_nb_cut <- data_ex_lvl %>% group_by(RESERVELINE_ID_M) %>% summarise(n_cutoff = n()) %>% rename("RESERVELINE_ID_M" = "reserveline_id_m")
 
----
+corpo_nb_cut <- data_corpo %>% group_by(RESERVELINE_ID_M) %>% summarise(n_cutoff = n()) 
 
-### Summary: Avoiding Data Quality and Validation Issues in the Pipeline
+valid_bi_nb_cut <- bi_nb_cut %>% anti_join(corpo_nb_cut)
 
-In the future, to minimize potential errors during model development, especially in larger pipelines, it would be helpful to establish a **data quality/validation check system**. This system should involve the addition of a few lines of code that would conduct validation checks before any training efforts begin.
+validation <- y %>% filter(reserveline_id_m == "981873")
 
-For example, the checks could include:
-1. **Imputation Check**: Ensuring that missing values have been appropriately handled before moving forward.
-2. **Warnings or Errors**: If any issue related to data quality comes up, warnings would be generated to notify the team of the potential problem.
+validation_corpo <- data_ex_lvl %>% filter(reserveline_id_m == "4497982")
 
-Such a process could help streamline the model development pipeline by catching any issues before training starts. It would also provide a structured way for the team to communicate and agree on what key aspects of the data need to be validated and addressed accordingly.
+val_aJ <- validation_corpo %>% anti_join(validation)
 
----
+test <- y %>% mutate(across(where(is.character), ~ str_sub(.x, start = 1, end = pmin(nchar(.x), 255))))
 
-If you want, I can help refine or expand on this based on your needs. Let me know how you would like to proceed!
+pool <- dbPool(drv = odbc::odbc(),
+    driver = "ODBC Driver 17 for SQL Server",
+    database = "azdwapprod001sql30",
+    uid = Sys.getenv("AZURE_PROD_USER"),
+    pwd = Sys.getenv("AZURE_PROD_PASS"),
+    server = "azdwapprod001sqlsynapse01.sql.azuresynapse.net",
+    Authentication = "ActiveDirectoryPassword",
+    port = 1433,
+    .connection_string = "as default is 1 which often leaves connections hanging (not cool)")
+
+# Add a new operation to the current recipe
