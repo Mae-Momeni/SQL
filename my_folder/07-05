@@ -1,25 +1,101 @@
-bi_nb_cut <- data_ex_lvl %>% group_by(RESERVELINE_ID_M) %>% summarise(n_cutoff = n()) %>% rename("RESERVELINE_ID_M" = "reserveline_id_m")
+y <- extraire workzone_table("E666487_BI_AR_CUTOFF_TRAINING_20250101")
 
-corpo_nb_cut <- data_corpo %>% group_by(RESERVELINE_ID_M) %>% summarise(n_cutoff = n()) 
+données_ex_lvl <- extract_workzone_table("EG66487_BI_AR_CUTOFF_TRAINING_EX_LVL_20250101")
 
-valid_bi_nb_cut <- bi_nb_cut %>% anti_join(corpo_nb_cut)
+6 bi_nb_cut <- data_ex_lvl %>% group_by(reserveline_id_m) %>% summarise(n_cutoff-n()) %>% rename("RESERVELINE_ID_M
 
-validation <- y %>% filter(reserveline_id_m == "981873")
+"reserveline_id_m") 7 corpo_nb_cut <- data_corpo %>% regrouper par (RESERVELINE_ID_M) %>% résumer(n_cutoff - n())
 
-validation_corpo <- data_ex_lvl %>% filter(reserveline_id_m == "4497982")
+8 valides < bi_nb_cut %>% anti_join(corpo_nb_cut)
 
-val_aJ <- validation_corpo %>% anti_join(validation)
+9
 
-test <- y %>% mutate(across(where(is.character), ~ str_sub(.x, start = 1, end = pmin(nchar(.x), 255))))
+10 valides < corpo_nb_cut %>% anti join(bi_nb_cut)
 
-pool <- dbPool(drv = odbc::odbc(),
-    driver = "ODBC Driver 17 for SQL Server",
-    database = "azdwapprod001sql30",
-    uid = Sys.getenv("AZURE_PROD_USER"),
-    pwd = Sys.getenv("AZURE_PROD_PASS"),
-    server = "azdwapprod001sqlsynapse01.sql.azuresynapse.net",
-    Authentication = "ActiveDirectoryPassword",
-    port = 1433,
-    .connection_string = "as default is 1 which often leaves connections hanging (not cool)")
+11
 
-# Add a new operation to the current recipe
+12
+
+13
+
+validation <- y %>% filtre(reserveline_id_m"981873")
+
+14
+
+15
+
+validation < data_ex_lvl %>% filtre(reserveline_id_m "4479982")
+
+16 validation_corpo <- data_corpo %>% filtre (RESERVELINE_ID_M "4479982")
+
+17
+
+18 val aj validation_corpo %>% anti_join(validation)
+
+19
+
+20 test <- y %>% muter (à travers (où(is.character), str_sub(.x, début 1, fin pain (nchar(.x), 255))))
+
+21
+
+22
+
+23
+
+24
+
+25
+
+26
+
+28
+
+29
+
+30
+
+31
+
+32
+
+27
+
+piscine pool::dbPool(odbc sec::odbc(),
+
+pilote "(pilote ODBC 17 pour SQL Server)",
+
+uid Sys.getenv("AZURE PROD_USER"),
+
+serveur « azdwappprod@1synapse01.sql.azuresynapse.net », authentification « ActiveDirectoryPassword »,
+
+base de données "azdwappprod01sq130",
+
+ped-Sys.getenv("AZURE_PROD_PWD "),
+
+33
+
+34
+
+port 1433,
+
+35
+
+#minSize, ## la valeur par défaut est 1, ce qui laisse souvent les connexions suspendues (pas coot) idleTimeout 600 ## 10 minutes jusqu'à ce que la connexion inactive soit rincée, tabes ~1 seconde pour réactiver
+
+18:1 (Niveau supérieur :
+
+Aide sur l'historique
+
+R : Ajouter une nouvelle opération à la recette actuelle-ind dans la rubrique
+
+add_step (recettes}
+
+Ajouter une nouvelle opération à la recette actuelle
+
+Description
+
+source
+
+RScript-
+
+Documentation R
