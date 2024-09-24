@@ -1,37 +1,49 @@
-Yes, this approach **does introduce data leakage** for a few reasons:
+### What is Data Leakage?
 
-### 1. **Imputed Data Using Model Predictions**:
-   - When you impute the missing target values using the **predictions from a previous version of the model**, you're essentially feeding **model-generated data** back into the training or validation process. This introduces bias because the model is indirectly training on its own predictions, which can lead to **overly optimistic performance** and **unreliable estimates** of model accuracy. This is especially problematic if the previous model's predictions are used as features or part of the target in the training of the new model.
+**Data leakage** happens when information that should not be available during the training phase of a model is included in the training data. This can lead to a situation where the model has access to information it wouldn’t normally have in a real-world prediction scenario, leading to **over-optimistic performance** during training and evaluation but **poor generalization** to unseen data.
 
-### 2. **Retrospective Imputation from Future Data**:
-   - The fact that you're imputing **past rows based on future data** (imputing one row retrospectively based on another row from a later time point) introduces a **temporal data leakage** problem. In time-dependent data, any use of future information to predict or fill in missing values in earlier time points is considered data leakage because it gives the model access to information that wouldn’t have been available in real time.
+### Why is Data Leakage Bad?
 
-   In time-series models, each time point is supposed to be predicted only using **past** or **current** data. If you are imputing values based on future data points (even indirectly), the model will perform better during training and testing but fail to generalize to unseen data because in a real-world scenario, future data wouldn't be available at the time of prediction.
+- **Inflated Performance Metrics**: Data leakage gives the model access to information that it shouldn’t have, leading to artificially improved performance during training. The model appears to perform well on test data but fails in real-world situations.
+- **Poor Generalization**: Because the model has learned patterns from the data it shouldn’t have seen, it will not generalize well to new, unseen data, causing poor performance in production or real-world applications.
+- **Misleading Insights**: Data leakage can lead to incorrect conclusions about the predictive power of features, leading to poor business decisions.
 
-### 3. **84 Rows Per ID – Temporal Dependency**:
-   - Since each ID has 84 rows corresponding to different time points, the model should respect the temporal order, meaning that the model can only use the current or past information to predict the target at any given time. Imputing missing values using a future time point introduces **information leakage**, as it uses data that wouldn't be available at the time you're trying to predict earlier events. This violates the principle of **time-sequential prediction**.
+### How and When Does Data Leakage Happen?
 
-### Why This is a Problem:
-1. **Inaccurate Model Evaluation**: 
-   - The model may appear to perform well during evaluation because it is getting hints from future information that it wouldn't have access to in a real-world application. This results in **inflated performance metrics** (e.g., lower RMSE or higher accuracy) that won't reflect how the model would behave on real, unseen data.
-   
-2. **Overfitting Risk**: 
-   - The model can overfit to the imputed values, especially if they come from a previous version of the model. Since these predictions were already biased by the previous model's assumptions and errors, they may introduce patterns that do not exist in the real-world data, leading to a failure in generalization.
+Data leakage can occur in several ways:
 
-### How to Fix It:
-To avoid data leakage in your scenario, you need to take steps to ensure that imputed values and model training respect the time-dependent structure of the data:
+1. **Preprocessing Before Data Splitting**:
+   - If transformations (such as scaling or imputing missing values) are done on the **entire dataset** before splitting into training and test sets, the test set data "leaks" into the training process. The model effectively "sees" the test data during training.
 
-1. **Avoid Using Future Data for Imputation**: 
-   - When filling in missing target values, avoid using any future data points. Use only data from the **current** or **past time points** to impute missing values. This ensures that the model isn't influenced by future information, maintaining the temporal integrity of the data.
+2. **Using Future Data in Time-Series**:
+   - In **time-series** data, leakage occurs when future values are used to predict past or current values. This gives the model an unfair advantage because, in real-world scenarios, future information is not available for making predictions.
 
-2. **Imputation Based on Historical Data Only**: 
-   - If you need to impute missing values, consider using only historical data or current values to impute missing targets. This ensures the imputation process aligns with how the model will be deployed in practice.
+3. **Target Leakage**:
+   - This happens when features used in the training process include information that is directly related to the target variable. For example, using "loan status" to predict loan default introduces target leakage, because "loan status" already contains the information you're trying to predict.
 
-3. **Reassess the Use of Previous Model Predictions**: 
-   - If the missing data is imputed using predictions from a previous model, this should be done with caution. Ideally, the model should be retrained on clean, non-imputed data, or the imputed values should not be used as part of the feature set or target for the new model.
+4. **Data Duplication**:
+   - If the same data points are present in both the training and test sets (due to duplication or improper splitting), the model has seen the test data during training, leading to inflated performance metrics.
 
-4. **Cross-Validation and Train-Test Split Respecting Time**: 
-   - When splitting your data into training and validation sets, ensure that **temporal order is maintained**. For instance, use **time-based cross-validation** (e.g., rolling-window or expanding-window cross-validation) where the training set contains only past data relative to the validation set, ensuring that the model doesn't see any future information during training.
+---
 
-### Conclusion:
-The process you're describing—imputing missing values retrospectively using future time points—**does introduce data leakage**. To avoid this, you should strictly maintain the temporal sequence of data and ensure that imputation or feature engineering is done without using future data. Instead, base imputation only on historical data or current time points to prevent leakage and improve the generalizability of your model.
+### Focus on Imputation of Missing Target Values by Previous Model Versions
+
+**Imputation of missing target values using a previous model version** introduces **data leakage** because the model is effectively "learning from its own predictions." This can result in the following issues:
+
+1. **Overfitting to Previous Model's Errors**: 
+   - When missing target values are imputed using predictions from a previous model, the new model may learn the previous model's biases and errors. This prevents the new model from truly learning the underlying patterns in the data and can lead to overfitting.
+
+2. **Leakage of Information from the Validation/Test Set**:
+   - If imputed values based on the previous model’s predictions are used during training, this introduces information from the validation/test data into the training process, leading to leakage. The model might learn patterns from the imputed targets that wouldn't have been available in real-world predictions.
+
+---
+
+### Retrospective Imputation in Temporal Data
+
+**Retrospective imputation in time-dependent data** involves filling in missing values in earlier time points based on **future information**. This creates a significant **temporal data leakage** problem because:
+
+1. **Future Information is Used to Impute Past Data**:
+   - When you impute earlier rows using data from future time points, you're allowing the model to learn from information that would not be available in real-world prediction scenarios. This gives the model an advantage during training, which leads to **inflated performance metrics**.
+
+2. **Violation of Temporal Order**:
+   - In time-series models, predictions should be made based on current or past information only. If future data is used (even indirectly through imputation), the model’s performance in real
