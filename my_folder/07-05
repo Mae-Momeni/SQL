@@ -1,49 +1,40 @@
-### What is Data Leakage?
+When a newer version of a model has **higher MAE (Mean Absolute Error) and RMSE (Root Mean Squared Error)** but shows **better aggregated performance** (i.e., the sum or total of predicted values is closer to the sum of actual values), it typically suggests that:
 
-**Data leakage** happens when information that should not be available during the training phase of a model is included in the training data. This can lead to a situation where the model has access to information it wouldn’t normally have in a real-world prediction scenario, leading to **over-optimistic performance** during training and evaluation but **poor generalization** to unseen data.
+### 1. **The Model is Optimized for Aggregate Performance**:
+   - The model may be designed or tuned in such a way that while individual predictions (measured by MAE and RMSE) might not be as accurate, the **overall or aggregate sum** of the predicted values (such as total claims, total sales, or any cumulative metric) is more accurate.
+   - This is common when the goal of the model is to make sure the **total predicted value** over a large dataset aligns closely with the actual total, even at the expense of per-instance prediction accuracy.
 
-### Why is Data Leakage Bad?
+### 2. **Trade-off Between Individual and Aggregate Accuracy**:
+   - **MAE** and **RMSE** are metrics that measure the **average prediction error** for individual data points. An increase in these values means that the model is making larger errors on a per-instance basis.
+   - However, the **aggregate performance** (e.g., the sum of predictions over all instances) could be more important for certain business cases, such as predicting total demand, total claims, or total revenue. Even if the model is off for some individual predictions, it might still capture the overall trend or total correctly.
 
-- **Inflated Performance Metrics**: Data leakage gives the model access to information that it shouldn’t have, leading to artificially improved performance during training. The model appears to perform well on test data but fails in real-world situations.
-- **Poor Generalization**: Because the model has learned patterns from the data it shouldn’t have seen, it will not generalize well to new, unseen data, causing poor performance in production or real-world applications.
-- **Misleading Insights**: Data leakage can lead to incorrect conclusions about the predictive power of features, leading to poor business decisions.
+   #### Example:
+   Imagine you're building a model to predict monthly insurance claims across regions:
+   - The **first version** might predict individual claims accurately (lower MAE/RMSE), but the total sum of predicted claims might differ significantly from the actual total claims.
+   - The **next version** might have higher MAE/RMSE (indicating that it's less accurate for individual predictions), but the total sum of predicted claims is closer to the actual total.
 
-### How and When Does Data Leakage Happen?
+### 3. **Model is Reducing Systematic Bias**:
+   - Higher MAE/RMSE could suggest that the model has become more variable in its individual predictions. However, if the **aggregate predicted values** are better, this might indicate that the model is now reducing **systematic bias** and predicting the overall trend or total more accurately.
+   - For instance, the model might be making more errors in specific instances, but it compensates for those errors by correcting for biases that were skewing the total predictions in the earlier version.
 
-Data leakage can occur in several ways:
+### 4. **Model May Better Capture Overall Trends**:
+   - The model may be capturing the **underlying distribution** of the data more accurately, even though it makes more errors for individual points.
+   - A model with better aggregate performance might be more successful at **capturing overall trends or seasonality** in time-series data, even if it struggles with individual data points.
 
-1. **Preprocessing Before Data Splitting**:
-   - If transformations (such as scaling or imputing missing values) are done on the **entire dataset** before splitting into training and test sets, the test set data "leaks" into the training process. The model effectively "sees" the test data during training.
+### 5. **Potential for Larger Errors in Specific Cases**:
+   - The newer version might make larger errors in some specific cases, leading to an increase in MAE/RMSE. However, these errors might be **balanced out** over the entire dataset, leading to a more accurate total or sum.
+   - For example, the model might under-predict for some instances and over-predict for others, but these errors **average out** when summing across all predictions.
 
-2. **Using Future Data in Time-Series**:
-   - In **time-series** data, leakage occurs when future values are used to predict past or current values. This gives the model an unfair advantage because, in real-world scenarios, future information is not available for making predictions.
+### Why This Happens:
+- **Objective of the Model**: The goal of the model might have shifted toward improving aggregate metrics (e.g., total revenue or claims) rather than focusing solely on individual accuracy. In this case, optimizing for aggregate performance can lead to increased individual errors.
+- **Trade-off Between Bias and Variance**: The model may have reduced systematic bias (improving aggregate performance) but at the cost of increasing variance, leading to higher errors for individual predictions.
+  
+### Business Case Scenario:
+In many business applications, aggregate performance might be more important than individual accuracy. For example:
+- **In insurance**, you might care more about accurately predicting the **total amount of claims** rather than each individual claim.
+- **In demand forecasting**, you might want the **total forecasted demand** for a product to be close to the actual demand, even if the model is less accurate on individual forecasts for each region.
 
-3. **Target Leakage**:
-   - This happens when features used in the training process include information that is directly related to the target variable. For example, using "loan status" to predict loan default introduces target leakage, because "loan status" already contains the information you're trying to predict.
-
-4. **Data Duplication**:
-   - If the same data points are present in both the training and test sets (due to duplication or improper splitting), the model has seen the test data during training, leading to inflated performance metrics.
-
----
-
-### Focus on Imputation of Missing Target Values by Previous Model Versions
-
-**Imputation of missing target values using a previous model version** introduces **data leakage** because the model is effectively "learning from its own predictions." This can result in the following issues:
-
-1. **Overfitting to Previous Model's Errors**: 
-   - When missing target values are imputed using predictions from a previous model, the new model may learn the previous model's biases and errors. This prevents the new model from truly learning the underlying patterns in the data and can lead to overfitting.
-
-2. **Leakage of Information from the Validation/Test Set**:
-   - If imputed values based on the previous model’s predictions are used during training, this introduces information from the validation/test data into the training process, leading to leakage. The model might learn patterns from the imputed targets that wouldn't have been available in real-world predictions.
-
----
-
-### Retrospective Imputation in Temporal Data
-
-**Retrospective imputation in time-dependent data** involves filling in missing values in earlier time points based on **future information**. This creates a significant **temporal data leakage** problem because:
-
-1. **Future Information is Used to Impute Past Data**:
-   - When you impute earlier rows using data from future time points, you're allowing the model to learn from information that would not be available in real-world prediction scenarios. This gives the model an advantage during training, which leads to **inflated performance metrics**.
-
-2. **Violation of Temporal Order**:
-   - In time-series models, predictions should be made based on current or past information only. If future data is used (even indirectly through imputation), the model’s performance in real
+### Summary:
+- **Higher MAE/RMSE** means the model makes larger errors for individual data points.
+- **Better aggregate performance** means the model predicts the overall trend or total (sum) more accurately.
+- This often indicates that the model has shifted to capture larger patterns or correct bias, even if it sacrifices per-instance prediction accuracy. The model's overall goal may be to ensure the **total predictions align with business metrics**, even if individual errors increase.
