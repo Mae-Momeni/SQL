@@ -1,146 +1,95 @@
-To demonstrate why the previous version of your model has **lower MAE/RMSE** but **worse aggregated performance**, you can perform a series of **example tests** that help reveal the differences in how the models handle individual predictions versus aggregated values. Here's a step-by-step approach to achieve this:
+If absolute-error-based metrics like MAE and RMSE aren't appropriate because they don't account for **error cancellation** at the aggregate level, you’ll need metrics that focus on **net errors** and how predictions balance out over time. These metrics should capture whether over-predictions and under-predictions balance out, rather than simply measuring the magnitude of individual errors.
 
-### 1. **Compare Predictions on Individual Data Points**:
-   - Create a scatter plot comparing **actual values** vs. **predicted values** for both the old and new models.
-   - This will help you visually see whether one model consistently predicts closer to the actual values or if both models are making similar individual errors.
+Here are a few alternative approaches that do not rely on absolute values and focus on **aggregate performance**:
+
+### 1. **Cumulative Sum of Residuals (CSR) Over Time**
+   - Instead of focusing on individual errors, you can track the **cumulative sum of residuals** over time to observe how the errors cancel out. This metric shows the running total of the differences between actual and predicted values, allowing you to see if the model’s errors balance each other out.
+   
+   #### Formula:
+   \[
+   \text{CSR}(t) = \sum_{i=1}^{t} (\text{Predicted}_i - \text{Actual}_i)
+   \]
+   Where:
+   - \( t \) is the time point (e.g., month),
+   - \( \text{Actual}_i \) is the actual value at time \( i \),
+   - \( \text{Predicted}_i \) is the predicted value at time \( i \).
 
    #### Code Example:
    ```python
-   import matplotlib.pyplot as plt
+   cumulative_residuals = np.cumsum(aggregated_predicted_values - aggregated_actual_values)
 
-   plt.figure(figsize=(10, 6))
-   plt.scatter(actual_values, previous_model_predictions, color='blue', alpha=0.5, label='Previous Model')
-   plt.scatter(actual_values, new_model_predictions, color='green', alpha=0.5, label='New Model')
-   plt.plot([min(actual_values), max(actual_values)], [min(actual_values), max(actual_values)], 'r--', label='Perfect Prediction')
-   plt.xlabel('Actual Values')
-   plt.ylabel('Predicted Values')
+   plt.plot(cumulative_residuals, label='Cumulative Sum of Residuals')
+   plt.axhline(y=0, color='red', linestyle='--', label='Zero Line')
+   plt.xlabel('Time (Months)')
+   plt.ylabel('Cumulative Residuals')
+   plt.title('Cumulative Sum of Residuals Over Time')
    plt.legend()
-   plt.title('Actual vs Predicted Values for Both Models')
    plt.show()
    ```
 
    **Interpretation**:
-   - If the points for the previous model are closer to the red line, this suggests it makes **better individual predictions**. 
-   - However, the plot will not show whether these errors are consistently in one direction (e.g., consistently over-predicting or under-predicting).
+   - If the **cumulative sum** fluctuates around 0, it indicates that the errors are canceling out over time. 
+   - A growing positive or negative trend in the cumulative residuals indicates systematic over-prediction or under-prediction, respectively.
+   
+   This approach shows whether the **net error** is increasing or decreasing over time, which is useful when you care about the overall trend of predictions.
 
-### 2. **Compare MAE and RMSE for Both Models**:
-   - Calculate **MAE** and **RMSE** for both models on the same data to show how much error each model makes on individual predictions.
-
-   #### Code Example:
-   ```python
-   from sklearn.metrics import mean_absolute_error, mean_squared_error
-   import numpy as np
-
-   mae_previous = mean_absolute_error(actual_values, previous_model_predictions)
-   mae_new = mean_absolute_error(actual_values, new_model_predictions)
-
-   rmse_previous = np.sqrt(mean_squared_error(actual_values, previous_model_predictions))
-   rmse_new = np.sqrt(mean_squared_error(actual_values, new_model_predictions))
-
-   print(f"Previous Model - MAE: {mae_previous}, RMSE: {rmse_previous}")
-   print(f"New Model - MAE: {mae_new}, RMSE: {rmse_new}")
-   ```
-
-   **Interpretation**:
-   - You should see lower MAE and RMSE values for the previous model, which will confirm that it performs better on individual predictions.
-   - However, this step does not tell us about the aggregate performance.
-
-### 3. **Evaluate Aggregate (Summed) Predictions**:
-   - Compare the **sum** of predicted values to the **sum** of actual values for both models. This is crucial for evaluating **aggregate performance**.
+### 2. **Net Bias Over Time (Relative to Actual Values)**
+   - You can calculate the **net bias** by summing the differences between the actual and predicted values over time, **without taking absolute values**. This will give you a direct measure of whether the model tends to systematically **over-predict** or **under-predict** over time.
+   
+   #### Formula:
+   \[
+   \text{Net Bias} = \frac{\sum (\text{Predicted}_t - \text{Actual}_t)}{\sum \text{Actual}_t} \times 100
+   \]
+   This gives the **percentage bias** relative to the total actual values.
 
    #### Code Example:
    ```python
-   total_actual = np.sum(actual_values)
-   total_predicted_previous = np.sum(previous_model_predictions)
-   total_predicted_new = np.sum(new_model_predictions)
-
-   print(f"Actual Total: {total_actual}")
-   print(f"Previous Model Predicted Total: {total_predicted_previous}")
-   print(f"New Model Predicted Total: {total_predicted_new}")
+   net_bias = np.sum(aggregated_predicted_values - aggregated_actual_values) / np.sum(aggregated_actual_values) * 100
+   print(f'Net Bias: {net_bias:.2f}%')
    ```
 
    **Interpretation**:
-   - If the total predicted by the **previous model** is far from the actual total, but its MAE/RMSE are low, this indicates the model is making small but **consistent errors** that are leading to poor aggregate predictions.
-   - If the **new model** has a total closer to the actual total, it suggests it is better at capturing the **overall trend or distribution** even if its individual predictions are less accurate.
+   - A **net bias** close to 0% indicates that the model's predictions balance out with the actual totals over time.
+   - A **positive bias** means the model is systematically over-predicting, while a **negative bias** means it is under-predicting.
 
-### 4. **Group-wise or Subset Analysis**:
-   - If your data can be grouped (e.g., by regions, categories, or time periods), you can calculate the **sum of predictions** and **sum of actuals** for each group. This will help identify where the previous model is failing to capture aggregate patterns.
+### 3. **Mean Signed Deviation (MSD)**
+   - **MSD** focuses on the **direction of errors** rather than their magnitude. It measures whether, on average, the model tends to over-predict or under-predict at each time point.
+   
+   #### Formula:
+   \[
+   \text{MSD} = \frac{1}{n} \sum_{t=1}^{n} (\text{Predicted}_t - \text{Actual}_t)
+   \]
    
    #### Code Example:
    ```python
-   import pandas as pd
-
-   df = pd.DataFrame({'actual': actual_values, 
-                      'previous_model': previous_model_predictions, 
-                      'new_model': new_model_predictions, 
-                      'group': group_column})
-
-   group_agg_previous = df.groupby('group')['previous_model'].sum()
-   group_agg_new = df.groupby('group')['new_model'].sum()
-   group_actual = df.groupby('group')['actual'].sum()
-
-   comparison = pd.DataFrame({
-       'Actual Total': group_actual,
-       'Previous Model Total': group_agg_previous,
-       'New Model Total': group_agg_new
-   })
-
-   print(comparison)
+   mean_signed_deviation = np.mean(aggregated_predicted_values - aggregated_actual_values)
+   print(f'Mean Signed Deviation (MSD): {mean_signed_deviation:.2f}')
    ```
 
    **Interpretation**:
-   - This breakdown will help you identify if the **previous model** is systematically **over-predicting** or **under-predicting** in certain groups, which might explain why it has better individual predictions but worse aggregate predictions.
-   - The **new model** might have better aggregate predictions by capturing the group-wise trends or distributions more accurately.
+   - **MSD = 0** means that, on average, the model's predictions are balanced with the actual values.
+   - **Positive MSD** indicates a tendency to over-predict, while **negative MSD** indicates a tendency to under-predict.
 
-### 5. **Residual Analysis for Each Model**:
-   - Calculate the **residuals** (the difference between the actual and predicted values) and examine their distribution. This can help demonstrate where the previous model’s errors cancel out, resulting in lower MAE/RMSE but worse aggregate predictions.
+### 4. **Tracking Error for Net Aggregate Performance**
+   - **Tracking Error** compares the **net sum of predictions** over time to the actual net sum. This metric focuses on the **total deviation** rather than point-wise errors.
+   
+   #### Formula:
+   \[
+   \text{Tracking Error} = \frac{\sum (\text{Predicted}_t - \text{Actual}_t)}{\sum \text{Actual}_t} \times 100
+   \]
+
+   This is a useful way to measure how well the **overall trend** of predictions matches the actual trend, particularly over longer periods of time.
 
    #### Code Example:
    ```python
-   residuals_previous = actual_values - previous_model_predictions
-   residuals_new = actual_values - new_model_predictions
-
-   plt.hist(residuals_previous, bins=50, alpha=0.5, label='Previous Model Residuals', color='blue')
-   plt.hist(residuals_new, bins=50, alpha=0.5, label='New Model Residuals', color='green')
-   plt.axvline(x=0, color='red', linestyle='--')
-   plt.xlabel('Residuals (Actual - Predicted)')
-   plt.ylabel('Frequency')
-   plt.legend()
-   plt.title('Distribution of Residuals')
-   plt.show()
+   tracking_error = (np.sum(aggregated_predicted_values) - np.sum(aggregated_actual_values)) / np.sum(aggregated_actual_values) * 100
+   print(f'Tracking Error: {tracking_error:.2f}%')
    ```
 
    **Interpretation**:
-   - If the **previous model**’s residuals are **clustered** around a small range (close to zero), this explains why it has a lower MAE and RMSE. However, it may show that the model is consistently off in one direction (e.g., consistently under-predicting), which can lead to poor aggregate performance.
-   - The **new model** might have a broader distribution of residuals (resulting in higher MAE/RMSE) but may better capture the true distribution of the data, resulting in better aggregate performance.
+   - A **tracking error** close to 0% indicates that the **total sum** of predictions closely matches the actual sum over time.
+   - **Positive tracking error** indicates over-prediction at the aggregate level, while **negative tracking error** indicates under-prediction.
 
-### 6. **Cumulative Error Plot**:
-   - To demonstrate how the errors accumulate over data points, you can plot the **cumulative sum of errors** (residuals). This will show whether the errors are canceling out in the previous model, leading to lower MAE/RMSE but worse total predictions.
+### 5. **Residual-based Aggregated Performance (Sum of Residuals at Each Time Point)**
+   - Instead of looking at individual prediction errors, calculate the **sum of residuals** at each time point (e.g., each month) to evaluate how much error is being canceled out at the aggregate level.
 
-   #### Code Example:
-   ```python
-   cumulative_error_previous = np.cumsum(residuals_previous)
-   cumulative_error_new = np.cumsum(residuals_new)
-
-   plt.plot(cumulative_error_previous, label='Previous Model Cumulative Error', color='blue')
-   plt.plot(cumulative_error_new, label='New Model Cumulative Error', color='green')
-   plt.axhline(y=0, color='red', linestyle='--')
-   plt.xlabel('Data Points')
-   plt.ylabel('Cumulative Error')
-   plt.legend()
-   plt.title('Cumulative Error Plot')
-   plt.show()
-   ```
-
-   **Interpretation**:
-   - If the cumulative error for the **previous model** hovers around zero, it suggests that errors are canceling out. However, if the **new model** shows more variation in cumulative error, this indicates it’s capturing more complex trends, even though its individual errors may be larger.
-
----
-
-### Summary:
-By running these tests, you can demonstrate:
-1. **Why the previous model has lower MAE and RMSE**: It may be making consistent, small errors that reduce individual error metrics.
-2. **Why the previous model has worse aggregate performance**: It fails to capture the overall trends or shifts in the new data distribution, resulting in worse total predictions.
-3. **Why the new model, despite higher MAE and RMSE, performs better on aggregated predictions**: It may have more variable individual errors but is better at capturing the underlying trends and distributions in the new data.
-
-These tests will provide a clear, data-driven explanation of the model's behavior on individual predictions vs. aggregate performance.
