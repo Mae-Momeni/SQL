@@ -1,95 +1,31 @@
-If absolute-error-based metrics like MAE and RMSE aren't appropriate because they don't account for **error cancellation** at the aggregate level, you’ll need metrics that focus on **net errors** and how predictions balance out over time. These metrics should capture whether over-predictions and under-predictions balance out, rather than simply measuring the magnitude of individual errors.
+Here’s the updated version with the requested change:
 
-Here are a few alternative approaches that do not rely on absolute values and focus on **aggregate performance**:
+---
 
-### 1. **Cumulative Sum of Residuals (CSR) Over Time**
-   - Instead of focusing on individual errors, you can track the **cumulative sum of residuals** over time to observe how the errors cancel out. This metric shows the running total of the differences between actual and predicted values, allowing you to see if the model’s errors balance each other out.
-   
-   #### Formula:
-   \[
-   \text{CSR}(t) = \sum_{i=1}^{t} (\text{Predicted}_i - \text{Actual}_i)
-   \]
-   Where:
-   - \( t \) is the time point (e.g., month),
-   - \( \text{Actual}_i \) is the actual value at time \( i \),
-   - \( \text{Predicted}_i \) is the predicted value at time \( i \).
+**Key Takeaways from the "Mastering the Responsible Use of Generative AI" Event:**
 
-   #### Code Example:
-   ```python
-   cumulative_residuals = np.cumsum(aggregated_predicted_values - aggregated_actual_values)
+1. **Governance and Risk Management:**
+   - Governance is critical in AI adoption, particularly for managing infrastructure, costs, and monitoring deprecated models.
+   - IBM’s "GenAI Risk Atlas" identifies 66 categories of risks related to Generative AI (GenAI), with a focus on bias, privacy, and transparency concerns.
+   - Adherence to emerging regulations (e.g., Bill 27) and conducting internal audits on bias and performance are essential for building trust in AI models.
 
-   plt.plot(cumulative_residuals, label='Cumulative Sum of Residuals')
-   plt.axhline(y=0, color='red', linestyle='--', label='Zero Line')
-   plt.xlabel('Time (Months)')
-   plt.ylabel('Cumulative Residuals')
-   plt.title('Cumulative Sum of Residuals Over Time')
-   plt.legend()
-   plt.show()
-   ```
+2. **Risks of GenAI:**
+   - GenAI poses risks like hallucination (false or fabricated information), impacting trust in its outputs.
+   - Integration of external AI models introduces transparency and cybersecurity risks, necessitating stringent oversight and security protocols.
+   - Proactive measures to protect against cyber threats targeting GenAI assets are essential.
 
-   **Interpretation**:
-   - If the **cumulative sum** fluctuates around 0, it indicates that the errors are canceling out over time. 
-   - A growing positive or negative trend in the cumulative residuals indicates systematic over-prediction or under-prediction, respectively.
-   
-   This approach shows whether the **net error** is increasing or decreasing over time, which is useful when you care about the overall trend of predictions.
+3. **Mitigation Strategies:**
+   - Risk management must encompass compliance, technology solutions, and education—tailored strategies are necessary for different enterprise needs.
+   - Establish frameworks for monitoring AI models' lifecycle, ensuring regulatory compliance, and embedding risk assessments in model development.
 
-### 2. **Net Bias Over Time (Relative to Actual Values)**
-   - You can calculate the **net bias** by summing the differences between the actual and predicted values over time, **without taking absolute values**. This will give you a direct measure of whether the model tends to systematically **over-predict** or **under-predict** over time.
-   
-   #### Formula:
-   \[
-   \text{Net Bias} = \frac{\sum (\text{Predicted}_t - \text{Actual}_t)}{\sum \text{Actual}_t} \times 100
-   \]
-   This gives the **percentage bias** relative to the total actual values.
+4. **Building a Culture of Responsibility:**
+   - Teams must be educated on both the risks and the proper use of GenAI. Leveraging existing risk frameworks, such as those from Microsoft or IBM, is key.
+   - Establishing AI ethics boards to define and enforce principles and rules around AI use is crucial for responsible adoption.
 
-   #### Code Example:
-   ```python
-   net_bias = np.sum(aggregated_predicted_values - aggregated_actual_values) / np.sum(aggregated_actual_values) * 100
-   print(f'Net Bias: {net_bias:.2f}%')
-   ```
+5. **Use Cases and Adoption in the Financial Industry:**
+   - GenAI presents opportunities in the financial industry for tasks like content summarization, data discovery, and automating repetitive processes.
+   - However, safeguarding data privacy and meeting regulatory requirements remain top priorities as GenAI becomes more integrated into workflows.
 
-   **Interpretation**:
-   - A **net bias** close to 0% indicates that the model's predictions balance out with the actual totals over time.
-   - A **positive bias** means the model is systematically over-predicting, while a **negative bias** means it is under-predicting.
+---
 
-### 3. **Mean Signed Deviation (MSD)**
-   - **MSD** focuses on the **direction of errors** rather than their magnitude. It measures whether, on average, the model tends to over-predict or under-predict at each time point.
-   
-   #### Formula:
-   \[
-   \text{MSD} = \frac{1}{n} \sum_{t=1}^{n} (\text{Predicted}_t - \text{Actual}_t)
-   \]
-   
-   #### Code Example:
-   ```python
-   mean_signed_deviation = np.mean(aggregated_predicted_values - aggregated_actual_values)
-   print(f'Mean Signed Deviation (MSD): {mean_signed_deviation:.2f}')
-   ```
-
-   **Interpretation**:
-   - **MSD = 0** means that, on average, the model's predictions are balanced with the actual values.
-   - **Positive MSD** indicates a tendency to over-predict, while **negative MSD** indicates a tendency to under-predict.
-
-### 4. **Tracking Error for Net Aggregate Performance**
-   - **Tracking Error** compares the **net sum of predictions** over time to the actual net sum. This metric focuses on the **total deviation** rather than point-wise errors.
-   
-   #### Formula:
-   \[
-   \text{Tracking Error} = \frac{\sum (\text{Predicted}_t - \text{Actual}_t)}{\sum \text{Actual}_t} \times 100
-   \]
-
-   This is a useful way to measure how well the **overall trend** of predictions matches the actual trend, particularly over longer periods of time.
-
-   #### Code Example:
-   ```python
-   tracking_error = (np.sum(aggregated_predicted_values) - np.sum(aggregated_actual_values)) / np.sum(aggregated_actual_values) * 100
-   print(f'Tracking Error: {tracking_error:.2f}%')
-   ```
-
-   **Interpretation**:
-   - A **tracking error** close to 0% indicates that the **total sum** of predictions closely matches the actual sum over time.
-   - **Positive tracking error** indicates over-prediction at the aggregate level, while **negative tracking error** indicates under-prediction.
-
-### 5. **Residual-based Aggregated Performance (Sum of Residuals at Each Time Point)**
-   - Instead of looking at individual prediction errors, calculate the **sum of residuals** at each time point (e.g., each month) to evaluate how much error is being canceled out at the aggregate level.
-
+This version refers to the financial industry as requested. Let me know if you’d like any other adjustments!
