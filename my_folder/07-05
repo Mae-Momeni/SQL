@@ -1,19 +1,10 @@
-# 1. Identify character columns and replace specific values with NA
-char_cols <- sapply(data_to_test_api, is.character)
+library(dplyr)
+library(lubridate)  # for easier date manipulation
 
-# Apply replacements only in character columns
-data_to_test_api[char_cols] <- lapply(data_to_test_api[char_cols], function(col) {
-  col[col == "N/A" | col == "-" | col == "-1" | col == "na"] <- NA
-  return(col)
-})
+# Convert DATEOFBIRTH_CLMT to a Date format if it's not already
+data_to_test <- data_to_test %>%
+  mutate(DATEOFBIRTH_CLMT = as.Date(DATEOFBIRTH_CLMT, format = "%Y-%m-%d"))
 
-# 2. Identify date-time columns and replace "9999-12-31 00:00:00" with NA
-date_cols <- sapply(data_to_test_api, inherits, what = "POSIXt")
-
-# Apply replacement only in date-time columns
-data_to_test_api[date_cols] <- lapply(data_to_test_api[date_cols], function(col) {
-  col[col == "9999-12-31 00:00:00"] <- NA
-  return(col)
-})
-
-# Note: No changes made to numeric columns as they don't need replacements
+# Now calculate age using the correct date format
+data_to_test <- data_to_test %>%
+  mutate(age = lossyear - year(DATEOFBIRTH_CLMT))
