@@ -1,1 +1,19 @@
-Congratulations on welcoming your second bundle of joy! It’s been a privilege to have you as my manager, and I know your growing family is lucky to have such a caring and strong role model. I hope you enjoy every moment of your maternity leave, creating more wonderful memories with your little ones. We’ll miss you here, but I’m excited to hear all about your experiences when you return. Wishing you and your family endless happiness!
+# 1. Identify character columns and replace specific values with NA
+char_cols <- sapply(data_to_test_api, is.character)
+
+# Apply replacements only in character columns
+data_to_test_api[char_cols] <- lapply(data_to_test_api[char_cols], function(col) {
+  col[col == "N/A" | col == "-" | col == "-1" | col == "na"] <- NA
+  return(col)
+})
+
+# 2. Identify date-time columns and replace "9999-12-31 00:00:00" with NA
+date_cols <- sapply(data_to_test_api, inherits, what = "POSIXt")
+
+# Apply replacement only in date-time columns
+data_to_test_api[date_cols] <- lapply(data_to_test_api[date_cols], function(col) {
+  col[col == "9999-12-31 00:00:00"] <- NA
+  return(col)
+})
+
+# Note: No changes made to numeric columns as they don't need replacements
