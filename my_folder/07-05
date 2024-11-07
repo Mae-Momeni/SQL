@@ -1,123 +1,78 @@
-Here’s a detailed and structured write-up based on the first set of images you provided, formatted for clarity and organized to help streamline the process for future use.
+Here’s the final section of the document based on your latest images, crafted with attention to detail and structure to facilitate an efficient and thorough sweep impact analysis process for future use.
 
-Automated Reserves - BI v3 Implementation
+Real Sweep Impact Analysis and Post-Implementation Testing
 
-Purpose of the Sweep Impact Analysis
+The next stage of the sweep impact analysis begins after the implementation and deployment of the BI v3 model in the production environment.
 
-The purpose of the sweep impact analysis is to evaluate the effect of transitioning from one model (BI v2) to another (BI v3) on outstanding reserve predictions. This process involves calculating the difference between the actual outstanding reserve in CIM (Claim Information Management), primarily driven by BI v2, and the predictions produced by BI v3.
+Overview of the Real Sweep Impact Process
 
-The analysis also focuses on validating that:
-	•	Predictions align with expected outcomes.
-	•	The variables in CIM for each Reserve Line (RL) are consistent with those in the API post-implementation.
+	1.	Exposure List and Dataset Preparation:
+	•	BI will provide a comprehensive list of exposures intended for processing through the claim exception batch within the CC Production environment.
+	•	The goal is to use the full exposure list to calculate the final sweep impact, starting on the deployment date.
+	2.	Testing Environment Considerations:
+	•	If a production-like environment is not available in the CC Perf region, IT may use a lower environment to simulate and check the process. Alternatively, a nightly batch approach can be adopted, with an initial batch of 1,000 exposures, allowing issues to be identified promptly.
+	3.	Batch Processing Strategy:
+	•	The sweep can be conducted over multiple nightly batches or within a single day, depending on resources and scheduling needs. Each nightly batch can process between 5,000 and 7,000 exposures, totaling up to 13,500 exposures for the entire sweep.
+	•	Ideally, the implementation and sweep should be completed on the same day or at the latest, the first day of the weekend.
 
-The following sections outline the steps to be taken in the sweep impact analysis, pre-sweep testing, data validation, and implementation testing, along with a structured procedure for efficient future use.
+Scenario Planning for Implementation
 
-Procedure
+The following table outlines potential scenarios for the sweep implementation, detailing the pros and cons of each approach.
 
-1. IT Sweep Test and Pre-Sweep Analysis
+Scenario	Pros	Cons
+1) Sunday Implementation	- Allows for full-day completion with no competing processes.- Minimal claim activity.	- Limited availability of resources (e.g., IT, BI teams) over the weekend.
+2) Thursday Implementation	- Access to full resources and teams for troubleshooting.- Ready for weekend testing.	- Increases workload on Friday if issues arise.- Possible delay in data for delivery.
 
-Objective
+Key Considerations:
+	•	Implementing the sweep on a non-busy day like Sunday allows all data to be processed without interruptions, minimizing the risk of missing updates in open RLs within CIM.
+	•	Completing the implementation over the weekend reduces claim activity, allowing for a clear picture of the model’s impact with minimal external variables.
 
-The sweep impact is defined as the difference between the actual outstanding reserve in CIM for granular cases and the BI v3 model predictions. Initial testing will be conducted using a sample of 500 exposures, processed through the claim exception batch in the CC Perf region environment, to ensure process accuracy.
+Additional Points to Consider When Conducting a Sweep
 
-Steps
+	1.	Testing in the CC Perf Region:
+	•	IT should test the sweep process in the CC Perf region using a sample of open lines. This provides an environment that closely mimics production and allows verification of process consistency.
+	•	If discrepancies arise, the cause should be investigated, with adjustments made to resolve any identified issues.
+	2.	Execution Within the Claim Exception Batch:
+	•	The sweep is conducted during the nightly claim exception batch (9-10 PM). Even with a new model, the batch recalculates predictions without significantly impacting the results due to the low threshold for change.
+	3.	Handling Multiple Reserve Lines:
+	•	When multiple reserve lines must be processed, the process may take several days. For significant updates, weekend work may be required to ensure all lines are covered.
+	•	Consult IT: Limited processing capacity necessitates collaboration with IT to manage expectations and identify bottlenecks.
+	4.	Data Freshness:
+	•	Reserve line information may change between the time of transmission and the sweep. Closed reserves or altered statuses can affect predictions. Always finalize the report with the most up-to-date data (use pool 01 if available).
 
-	1.	Coordination with IT:
-	•	Contact IT to confirm availability for the sweep analysis, ensuring there are no competing priorities (e.g., code freezes or high-priority projects).
-	•	Collaborative Testing: The IT team collaborates closely to ensure successful setup and execution of the sweep analysis.
-	2.	Data Preparation:
-	•	Extract Open Reserve Lines: Use a specified date to retrieve all open reserve lines along with relevant model variables. For the final sweep, ensure the data is as recent as possible (use pool 01 if needed).
-	•	Reserve Line Selection: Choose reserve lines based on the automated reserve model, focusing on those affected by the change. For major model changes, use all open lines; for minor updates, use only impacted lines.
-	3.	Test Sample (500 Exposures):
-	•	Use a sample of 500 exposures as a testing subset. This sample helps simulate the process without impacting full-scale operations.
-	•	Key Consideration: Some Reserve Lines (RLs) may not pass through the claim exception batch if they are closed or otherwise unavailable.
+Post-Implementation Validation and Error Reconciliation
 
-Purpose of the 500 Exposure Test
+Key Steps in Error Identification and Data Validation
 
-This initial sample helps identify potential discrepancies between CIM and the Claim Center by simulating a controlled sweep. This process assists in verifying model functionality and exposing gaps that need addressing.
+	1.	Validation of API Predictions:
+	•	Post-implementation testing involves comparing the API predictions against expected values. Ensure all Reserve Lines (RLs) match the expected parameters in both the CIM and API logs to prevent discrepancies.
+	2.	Handling Discrepancies:
+	•	For RLs with open reserves that appear in the logs but do not have a corresponding API call, verify their status. Often, closed reserves may trigger this issue, in which case further checks with IT are necessary.
+	3.	Data Quality Verification:
+	•	Each nightly batch should be checked to ensure all variables align across CIM and API logs. This step confirms the integrity of the data, helping avoid cumulative discrepancies.
 
-Additional Tests
+Real Sweep Impact Analysis: Detailed Steps
 
-	•	Prediction Consistency Check: Confirm that predictions logged by the API are consistent with those in development.
-	•	Variable Verification: Verify that the inputs from CIM match those recorded in the API logs. Any discrepancies should be investigated to identify potential impacts on model predictions.
+	1.	Calculate the Real Sweep Impact:
+	•	The real sweep impact is measured as the difference between the actual outstanding reserve before implementation and the predicted reserve immediately post-implementation.
+	•	Some reserve lines may settle before entering the claim exception batch, rendering them non-impactful to the final analysis.
+	2.	Discrepancy Check:
+	•	Conduct a detailed check between the last row in CIM and the first row in logs post-implementation. For any discrepancies identified, open an IT ticket to resolve issues promptly.
+	3.	Manual Checks for Specific Cases:
+	•	For any reserve lines that did not pass through the API, it is critical to ensure these instances are thoroughly examined. Missing data for these reserves can lead to incorrect or incomplete impact analysis.
 
-2. Sweep Impact Report Generation
+Post-Sweep Analysis and Root Cause Investigation
 
-The following steps outline how to create a comprehensive sweep impact report, breaking down data validation, reserve prediction, and the final impact assessment.
+Error Identification and Variable Analysis
 
-2.1 Data Quality Validation
+	1.	Mismatch Analysis Using sweep_error.R:
+	•	Run sweep_error.R to generate a list of mismatched variables between predictions in logs and CIM for each reserve line. Analyze whether mismatches stem from data inconsistencies or BI v3 model adjustments.
+	2.	Root Cause Analysis for Significant Sweep Impacts:
+	•	If a substantial impact is detected, further analysis is required to identify the responsible variables or conditions. Possible causes include:
+	•	Data Extraction Issues: Errors may arise from incomplete data transfers from CIM.
+	•	Character Limit Differences: Certain notes fields may truncate data, leading to prediction variances.
+	•	Input Errors: Ensure the correct variables are processed in the claim exception batch; errors may necessitate IT adjustments or further model review.
+	3.	Documentation of Manual Cases:
+	•	Document reserve lines with actual outstanding reserves exceeding 1M as manual cases. Tracking these cases enables a comparative study to identify patterns of discrepancy, assessing whether they are data- or model-driven.
 
-	1.	Validation Steps:
-	•	Open Reserve Line Validation: Use a reporting tool (e.g., MicroStrategy) to confirm the count of open reserve lines.
-	•	Input Consistency: Validate that the inputs from CIM match those in the API logs, ensuring uniformity across environments.
-	•	Sweep Test in CC Perf Region: Conduct a sweep test in the CC Perf region with IT support to confirm data accuracy and readiness for full implementation.
-	2.	Assignment and Timeline:
-	•	A designated team member will be responsible for the data validation tasks, estimated to take up to three days.
-
-2.2 Reserve Prediction
-
-	1.	Predict Reserves: Use the new BI v3 model to predict reserves for the selected lines. This prediction provides a basis for comparing results against the actual outstanding reserve driven by BI v2.
-
-2.3 Impact Calculation
-
-	1.	Calculate Impact Difference:
-	•	The impact is calculated by comparing the predicted reserves from BI v3 with the actual reserves from BI v2. Using the outstanding reserve as a baseline, this analysis will provide a clear understanding of the model change’s effects.
-	2.	Generate Final Report:
-	•	Report Template: Use the sweep_impact.html template available in the repository for consistency. This report should detail the impact split by key variables, such as policy product and location.
-	•	Stakeholder Presentation: Format the report to meet stakeholder requirements, providing a breakdown by variables (e.g., policy product, loss location province).
-
-2.4 Instructions for Future Report Enhancements
-
-	1.	Improvement Note:
-	•	Document areas for future improvement, such as refining the code in the sweep_impact.html template to capture additional variables or metrics as needed.
-
-3. IT Test Instructions Before Deployment
-
-The IT team is responsible for conducting a test sweep impact analysis before full deployment to ensure the environment is ready for BI v3 implementation.
-
-Test Requirements
-
-	1.	Environment: Tests will be conducted in the CC Perf region, which mirrors production-like data for accuracy.
-	2.	Test Scope:
-	•	Script Execution: A script will be run to add a list of exposures (provided by BI) to the claim exception batch.
-	•	Support Availability: IT staff should be available to address any questions related to variable processing (e.g., how variables are sent to the API).
-
-Estimated Time
-
-	•	Script Creation: Approximately a couple of hours to prepare the script.
-	•	Script Execution: About 10 minutes to run the script.
-
-Validation Process
-
-	1.	Add Exposures to Claim Exception Batch:
-	•	Run the script to insert exposures into the batch and verify that they process without issues.
-	2.	Prediction Verification:
-	•	Confirm that the BI v3 predictions match expected values for all exposures.
-
-4. Handling Issues in the Sweep Process
-
-BI Team Responsibilities
-
-	1.	Exposure List Management:
-	•	Provide the list of exposures to be processed in the claim exception batch.
-	•	Validation of Predictions: Ensure that the predictions generated for these exposures align with expected outcomes.
-
-Issue Resolution
-
-	1.	Discrepancy Resolution:
-	•	If discrepancies arise between internal predictions and the sweep outcomes, adjust the variables sent to the model as needed.
-	•	Implementation Timing: Determine whether fixes should occur before or after full deployment based on the impact of the issue.
-	2.	IT Side:
-	•	API Call Triggering: For exposures with open Automated reserves, trigger a call to R during the nightly claim exception batch.
-	•	Flagging Mechanism: Use a script to set the lastreservecalculated_ext field on exposure to true for exposures provided by BI.
-	•	Automatic Trigger: Once the field is set to true, the claim exception batch will automatically trigger a call to R.
-
-Regular IT Testing
-
-	1.	Objective:
-	•	IT is expected to conduct regular tests during new model implementations to ensure that all processes function as expected.
-	2.	Sweep Test Validation:
-	•	Ensure IT successfully flags exposures when passing them through the claim exception batch.
-	•	Closed Reserve Lines: Check logs to ensure that no exposures are excluded from processing due to closed statuses.
-
-This document covers the initial sections, including objectives, procedures for pre-sweep and sweep impact tests, report generation, IT test instructions, and handling issues during the sweep process. Let me know when you’re ready to proceed with the next chunk or if any additional details are required in these sections.
+This concludes the final section of the Automated Reserves - BI v3 Sweep Impact Analysis and Post-Implementation Testing document. This comprehensive document provides step-by-step instructions and considerations, ensuring future implementations can be handled swiftly and accurately by following established procedures.
