@@ -1,1 +1,56 @@
-1
+Understood. I’ll create the content with a focus on using your words precisely and avoiding added interpretations. Here’s the updated content for the Code Management and Future Update Checklist page, based on your description:
+
+Code Management and Future Update Checklist
+
+This page provides an overview of the code files used in the sweep impact analysis, along with a checklist for future updates. This guide will help new team members locate and understand the code required for each step of the process.
+
+Code Repository
+
+Our repository is in Bitbucket and includes the following files essential for the sweep impact analysis:
+
+1. sweep.pipeline.R
+
+	•	Functionality:
+	•	Data Extraction: Reads extracted data from the open_RL.sql query.
+	•	Data Preparation: Prepares data for scoring.
+	•	Model Scoring: Scores the data once using model v2 and again using model v3.
+	•	Exposure List Creation: Creates a list of exposures for IT.
+	•	Dataset Preparation:
+	•	Creates the dataset for the pre-sweep report.
+	•	Prepares the final dataset for the real sweep impact by reading data extracted from logs.
+
+2. sweep_impact.rmd
+
+	•	Functionality: Creates the sweep impact report.
+	•	Usage:
+	•	This file is used for both the pre-sweep report and the real sweep impact report. The only difference is the input dataset used.
+
+3. sweep_error.R
+
+	•	Functionality: Used for data validation by comparing CIM data with logs.
+	•	Purpose:
+	•	Identifies mismatches in predicted reserves.
+	•	Detects variable mismatches for each row of data for each Reserve Line (RL).
+
+Future Update Checklist
+
+This checklist provides steps to update the code files as necessary for future analyses.
+
+1. sweep.pipeline.R Updates
+
+	•	Verify Data Extraction: Ensure that the open_RL.sql query is up to date with any changes to the data required for analysis.
+	•	Model Scoring Adjustments: If model v2 or v3 is updated, confirm that scoring adjustments are reflected in the code.
+	•	Exposure List Creation: Check that the exposure list generation aligns with IT’s requirements.
+	•	Dataset Preparation for Reports: Ensure the datasets for both the pre-sweep and real sweep impact reports are correctly structured.
+
+2. sweep_impact.rmd Updates
+
+	•	Report Structure: Confirm that the report structure meets current requirements.
+	•	Input Dataset: Verify that the correct input dataset is used for either the pre-sweep or real sweep impact report.
+
+3. sweep_error.R Updates
+
+	•	Comparison Logic: Update the comparison logic if there are changes in CIM data fields or logging formats.
+	•	Discrepancy Identification: Ensure all relevant discrepancies in predicted reserves and variables are flagged.
+
+This page provides a quick reference for managing and updating the code files related to the sweep impact analysis, ensuring consistency and accuracy for future runs.
