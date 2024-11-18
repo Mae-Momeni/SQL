@@ -1,3 +1,117 @@
+Topic 1: Version Control
+
+Introduction
+
+Version control is a critical part of any collaborative data science and engineering project. It ensures that changes to code, models, and data are tracked, enables collaborative workflows, and provides a safety net to roll back changes when necessary. This section outlines best practices for using Git effectively.
+
+1. Git Workflow and Branching Strategies
+
+	•	Branch Types:
+	1.	Main (or main): The stable branch representing the production-ready state of the project.
+	2.	Development (or develop): The active branch where ongoing development occurs.
+	3.	Feature Branches: Used for implementing new features (e.g., feature/v3_model_training).
+	4.	Bugfix Branches: For fixing specific bugs in the codebase (e.g., bugfix/issue_123).
+	5.	Hotfix Branches: For urgent fixes applied directly to production (e.g., hotfix/critical_fix).
+	6.	Release Branches: For final testing and polishing before merging to main (e.g., release/v3.0).
+	•	Branching Strategy:
+	•	Gitflow: Use a branching strategy like Gitflow for structured development:
+	•	main: Production-ready branch.
+	•	develop: Active development branch.
+	•	feature/*: New features branch from develop.
+	•	bugfix/*: Bug fixes branch from develop.
+	•	hotfix/*: Critical fixes branch directly from main and merge back into main and develop.
+	•	release/*: Branch from develop for preparing releases.
+
+2. Commit Message Conventions
+
+Use clear and consistent commit messages to improve collaboration and code readability. Adopt this format for commit messages:
+	•	Structure:
+
+[type]: Brief summary of the change
+
+	•	Types:
+	•	feat: A new feature (e.g., feat: add v3 model retraining pipeline).
+	•	fix: A bug fix (e.g., fix: correct data type issue in training dataset).
+	•	docs: Documentation changes (e.g., docs: update README for v3 model).
+	•	style: Code style changes (e.g., style: reformat code for consistency).
+	•	refactor: Code restructuring (e.g., refactor: optimize feature engineering pipeline).
+	•	test: Adding or modifying tests (e.g., test: add unit tests for API endpoints).
+
+3. Commit Best Practices
+
+	•	Keep Commits Atomic: Each commit should represent one logical change (e.g., “add preprocessing step”).
+	•	Write Descriptive Messages: Avoid vague messages like “fixed bug.”
+	•	Avoid Large Commits: Break down large changes into smaller, manageable commits.
+
+4. Tagging and Versioning
+
+Tags provide snapshots of the repository for releases or milestones.
+	•	Tagging Syntax: Use semantic versioning (vMAJOR.MINOR.PATCH):
+	•	v1.0.0: Initial release.
+	•	v1.1.0: Minor update or new feature.
+	•	v1.1.1: Patch for a bug fix.
+	•	Example: Tag a release with git tag -a v1.0.0 -m "First stable release".
+
+5. Pull Requests and Code Reviews
+
+	•	Use Pull Requests for Changes:
+	•	Create a pull request (PR) for every feature or bugfix branch.
+	•	Include a clear description of the change and why it’s needed.
+	•	Code Review Checklist:
+	•	Does the code follow style guidelines?
+	•	Is the logic clear and maintainable?
+	•	Are there adequate comments and documentation?
+	•	Do the tests cover the new functionality?
+
+6. Merging Strategies
+
+	•	Use merge or rebase:
+	•	Merge for larger changes, preserving branch history.
+	•	Rebase for smaller, linear histories.
+	•	Best Practices:
+	•	Always ensure the branch is up-to-date with main or develop before merging.
+	•	Resolve conflicts locally and test thoroughly.
+
+7. Git Commands Reference
+
+Command	Purpose
+git init	Initialize a new Git repository
+git clone <repo>	Clone an existing repository
+git checkout -b <branch>	Create and switch to a new branch
+git add <file>	Stage changes
+git commit -m "<msg>"	Commit staged changes with a message
+git push origin <branch>	Push changes to a remote repository
+git pull	Fetch and merge changes from the remote
+git tag -a <tag>	Create an annotated tag
+git merge <branch>	Merge changes from one branch to another
+
+8. Example Workflow
+
+	1.	Create a feature branch for a new model:
+
+git checkout -b feature/v3_model_training
+
+
+	2.	Make and commit changes:
+
+git add .
+git commit -m "feat: add v3 training pipeline"
+
+
+	3.	Push changes and create a pull request:
+
+git push origin feature/v3_model_training
+
+
+	4.	Review and merge the PR into develop.
+
+This sub-page provides a solid foundation for version control best practices, enabling the team to work collaboratively and efficiently. Would you like help creating content for the next topic?
+
+
+
+
+
+
 Here is a restructured and rewritten version of your page tailored to address the challenges your team faced during the big model training and post-analysis project. The focus is on branch strategies and collaboration planning to ensure a smooth and efficient workflow when multiple people are working on the same project simultaneously.
 
 Repository Best Practices for Collaborative Projects
@@ -118,4 +232,154 @@ Weekly Syncs:
 	5.	Conflict Resolution Tips
 	6.	Task Management for Large Projects
 
-By following this structured approach, your team can minimize confusion, reduce merge conflicts, and ensure a smooth collaborative workflow for any project, including large-scale model training and post-analysis.
+By following this structured approach
+
+
+
+
+
+
+
+Branching Strategy for Collaborative Projects
+
+Effective branching strategies are essential for teams working on multiple tasks within the same repository, especially when tasks are interdependent. Here are detailed guidelines for organizing branches when multiple people are collaborating:
+
+1. Branch Types
+
+Your branching strategy should include the following types:
+	1.	Main Branch (main):
+	•	The stable branch containing production-ready code.
+	•	Only merge tested and reviewed changes into main.
+	2.	Develop Branch (develop):
+	•	The integration branch where features and tasks are merged.
+	•	Serves as the base for all feature branches.
+	•	This branch is tested regularly but is not considered production-ready.
+	3.	Feature Branches (feature/*):
+	•	Used to develop individual features or large tasks.
+	•	Each feature branch focuses on one functionality or independent task.
+	•	Naming convention: feature/<task_name> (e.g., feature/data_cleaning, feature/model_training).
+	4.	Task Branches (task/*):
+	•	Sub-branches of feature branches for specific smaller tasks within a larger feature.
+	•	Useful when a single feature involves multiple contributors.
+	•	Naming convention: task/<feature_name>/<sub_task> (e.g., task/data_cleaning/missing_values).
+	5.	Report Branches (report/*):
+	•	Dedicated branches for writing specific sections of a report or conducting analyses for the report.
+	•	Naming convention: report/<section> (e.g., report/eda_summary, report/model_performance).
+	6.	Bugfix Branches (bugfix/*):
+	•	For resolving bugs found in develop or main.
+	•	Naming convention: bugfix/<issue_description> (e.g., bugfix/fix-null-values).
+	7.	Hotfix Branches (hotfix/*):
+	•	For urgent fixes in production (main branch).
+	•	Naming convention: hotfix/<issue_description> (e.g., hotfix/api-timeout-error).
+	8.	Release Branches (release/*):
+	•	Temporary branches created for final testing before merging into main.
+	•	Naming convention: release/<version> (e.g., release/v3.0).
+
+2. How Many Feature Branches to Create?
+
+The number of feature branches depends on the size of the project, the number of contributors, and the independence of tasks. Here are some guidelines:
+
+When Tasks Are Independent:
+
+	•	One Feature Branch Per Task:
+	•	Example: If three people are working on data cleaning, model training, and exploratory data analysis, create:
+	•	feature/data_cleaning
+	•	feature/model_training
+	•	feature/eda
+	•	Assign each contributor to their respective feature branch.
+
+When Tasks Are Interdependent:
+
+	•	Create a Shared Feature Branch with Task Sub-Branches:
+	•	Example: If multiple people are working on preprocessing (e.g., handling missing values, scaling, and encoding):
+	•	Create a shared feature/data_preprocessing branch.
+	•	Create task branches:
+	•	task/data_preprocessing/missing_values
+	•	task/data_preprocessing/scaling
+	•	task/data_preprocessing/encoding
+
+When Reports Require Collaboration:
+
+	•	Create Separate Report Branches for Each Section:
+	•	Example: If one person is working on EDA results and another on model performance:
+	•	report/eda_summary
+	•	report/model_performance
+	•	Merge these branches into a shared report branch regularly.
+
+3. Key Practices for Managing Multiple Feature Branches
+
+A. Synchronize Regularly
+
+	•	Pull Changes Daily: Ensure that everyone pulls changes from the parent branch (develop) to avoid large merge conflicts later.
+	•	Merge into develop Frequently: Feature branches should not grow too large. Merge regularly to integrate progress.
+
+B. Minimize Dependency Risks
+
+	•	For dependent tasks, plan task order and branch relationships in advance.
+	•	Example: Preprocessing tasks must be completed before training begins.
+	•	Merge preprocessing results into develop before starting model training.
+
+C. Avoid Overlap in Work
+
+	•	Assign clear responsibilities for each branch. If tasks overlap, discuss how to divide work to prevent conflicts.
+
+D. Test Before Merging
+
+	•	Test your feature branch locally or with automated tests before merging into develop.
+
+E. Use Tags for Milestones
+
+	•	Tag key points in the workflow to allow easy reference (e.g., v1.0-preprocessing-complete).
+
+4. Example Branching Plan
+
+Scenario:
+
+Five team members are working on the following tasks for a model training project:
+	1.	Data cleaning (Person A)
+	2.	Exploratory analysis (Person B)
+	3.	Feature engineering (Person C)
+	4.	Model training (Person D)
+	5.	Report writing (Person E)
+
+Proposed Branching Strategy:
+
+	•	main: Stable production-ready branch.
+	•	develop: Integration branch.
+	•	Feature branches:
+	•	feature/data_cleaning (Person A)
+	•	feature/eda (Person B)
+	•	feature/feature_engineering (Person C)
+	•	feature/model_training (Person D)
+	•	feature/report (Person E)
+	•	Task branches (if needed):
+	•	task/feature_engineering/interaction_terms (Person C)
+	•	task/feature_engineering/polynomial_features (Person C)
+	•	task/report/model_performance (Person E)
+	•	PR Reviews:
+	•	Assign one reviewer for each feature branch.
+	•	Example: Person C reviews Person A’s PR for feature/data_cleaning.
+
+5. PR Review and Conflict Resolution
+
+PR Review Guidelines:
+
+	1.	Test Your Code: Ensure your branch runs without errors before submitting a PR.
+	2.	Review Checklist:
+	•	Is the code style consistent?
+	•	Does the code address the task described?
+	•	Are all tests passing?
+
+Conflict Resolution:
+
+	•	Early Synchronization: Pull and merge changes regularly to reduce the chance of conflicts.
+	•	Resolve Locally:
+	•	Use git merge or git rebase to handle conflicts.
+	•	Test thoroughly before pushing changes.
+
+By following this approach, your team can effectively manage branches, reduce conflicts, and streamline collaboration during large-scale projects. Use the Confluence repository page to document the plan, branch assignments, and responsibilities.
+
+
+
+
+, your team can minimize confusion, reduce merge conflicts, and ensure a smooth collaborative workflow for any project, including large-scale model training and post-analysis.
