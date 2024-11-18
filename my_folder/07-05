@@ -1,385 +1,137 @@
-Topic 1: Version Control
+Structured Template for Confluence Page for Pull Request Reviews
+
+This document outlines the required structure for Confluence pages associated with each pull request (PR). Developers must fill out the page for every PR they create. This ensures that all reviewers have complete context and necessary information for efficient and thorough code reviews.
+
+Pull Request Review Documentation Template
+
+PR Title:
+
+	•	Example: feat: Add v3 data preprocessing pipeline
+
+1. Project Overview
 
-Introduction
+Provide an overview of the project or feature the PR is addressing.
+	•	Project Name:
+	•	Example: V3 Model Development
+	•	Purpose:
+	•	Example: Implement data preprocessing steps for the v3 model pipeline.
+	•	Related JIRA/Trello/Task ID (if applicable):
+	•	Example: JIRA-123
 
-Version control is a critical part of any collaborative data science and engineering project. It ensures that changes to code, models, and data are tracked, enables collaborative workflows, and provides a safety net to roll back changes when necessary. This section outlines best practices for using Git effectively.
+2. Purpose of the Changes
 
-1. Git Workflow and Branching Strategies
+Clearly state the purpose of this PR.
+	•	Why are these changes being made?
+	•	Example: This PR introduces data preprocessing steps to handle missing values, scale numerical features, and encode categorical variables for the v3 model pipeline.
+	•	What problem does this solve?
+	•	Example: It ensures the dataset is prepared correctly for model training and evaluation.
+	•	What specific outcome do we want?
+	•	Example: Clean and transformed data ready for input into the v3 model.
 
-	•	Branch Types:
-	1.	Main (or main): The stable branch representing the production-ready state of the project.
-	2.	Development (or develop): The active branch where ongoing development occurs.
-	3.	Feature Branches: Used for implementing new features (e.g., feature/v3_model_training).
-	4.	Bugfix Branches: For fixing specific bugs in the codebase (e.g., bugfix/issue_123).
-	5.	Hotfix Branches: For urgent fixes applied directly to production (e.g., hotfix/critical_fix).
-	6.	Release Branches: For final testing and polishing before merging to main (e.g., release/v3.0).
-	•	Branching Strategy:
-	•	Gitflow: Use a branching strategy like Gitflow for structured development:
-	•	main: Production-ready branch.
-	•	develop: Active development branch.
-	•	feature/*: New features branch from develop.
-	•	bugfix/*: Bug fixes branch from develop.
-	•	hotfix/*: Critical fixes branch directly from main and merge back into main and develop.
-	•	release/*: Branch from develop for preparing releases.
+3. Requirements Checklist
 
-2. Commit Message Conventions
+Document the requirements this PR fulfills. Provide a clear checklist of tasks or conditions related to the feature or code being added.
 
-Use clear and consistent commit messages to improve collaboration and code readability. Adopt this format for commit messages:
-	•	Structure:
+Requirement	Status	Comments
+Handle missing values	✅ Completed	Mean imputation implemented.
+Scale numerical features	✅ Completed	StandardScaler applied.
+Encode categorical variables	🔲 Pending	Awaiting feature list approval from team lead.
 
-[type]: Brief summary of the change
+4. Code Changes Summary
 
-	•	Types:
-	•	feat: A new feature (e.g., feat: add v3 model retraining pipeline).
-	•	fix: A bug fix (e.g., fix: correct data type issue in training dataset).
-	•	docs: Documentation changes (e.g., docs: update README for v3 model).
-	•	style: Code style changes (e.g., style: reformat code for consistency).
-	•	refactor: Code restructuring (e.g., refactor: optimize feature engineering pipeline).
-	•	test: Adding or modifying tests (e.g., test: add unit tests for API endpoints).
+Summarize the changes made in the codebase. Include references to specific files or parts of the code.
+	•	Files Modified:
+	•	preprocessing_pipeline.R
+	•	feature_engineering.R
+	•	Key Changes:
+	•	Added mean imputation for missing values.
+	•	StandardScaler for numerical features.
+	•	Placeholder for encoding categorical variables.
+	•	Lines of Code (LOC):
+	•	Added: +200
+	•	Deleted: -50
 
-3. Commit Best Practices
+5. Tests and Validation
 
-	•	Keep Commits Atomic: Each commit should represent one logical change (e.g., “add preprocessing step”).
-	•	Write Descriptive Messages: Avoid vague messages like “fixed bug.”
-	•	Avoid Large Commits: Break down large changes into smaller, manageable commits.
+Provide information about tests conducted for the PR and their results.
+	•	Unit Tests:
+	•	✅ test_preprocessing.R: Passed
+	•	Integration Tests:
+	•	🔲 Pending (Scheduled for 2024-11-15)
+	•	Edge Case Tests:
+	•	✅ Null value handling
+	•	🔲 Large dataset scaling
+	•	Testing Results Summary:
 
-4. Tagging and Versioning
+All unit tests passed. Integration tests scheduled for 2024-11-15. Edge case tests pending final dataset.
 
-Tags provide snapshots of the repository for releases or milestones.
-	•	Tagging Syntax: Use semantic versioning (vMAJOR.MINOR.PATCH):
-	•	v1.0.0: Initial release.
-	•	v1.1.0: Minor update or new feature.
-	•	v1.1.1: Patch for a bug fix.
-	•	Example: Tag a release with git tag -a v1.0.0 -m "First stable release".
+6. Developer Comments
 
-5. Pull Requests and Code Reviews
+Include any additional comments or insights to help reviewers understand the code.
+	•	Assumptions:
+	•	All numerical columns are standardized with no outliers.
+	•	Known Limitations:
+	•	Encoding for categorical variables is pending team approval.
+	•	Areas for Feedback:
+	•	Review logic for scaling and transformation of numerical data.
 
-	•	Use Pull Requests for Changes:
-	•	Create a pull request (PR) for every feature or bugfix branch.
-	•	Include a clear description of the change and why it’s needed.
-	•	Code Review Checklist:
-	•	Does the code follow style guidelines?
-	•	Is the logic clear and maintainable?
-	•	Are there adequate comments and documentation?
-	•	Do the tests cover the new functionality?
+7. Links to Supporting Materials
 
-6. Merging Strategies
+Include links to related files, tasks, or documentation.
+	•	JIRA Task: JIRA-123
+	•	Data Treatment Plan: Confluence Page: Data Treatment for V3
+	•	Test Results: Link to Test Outputs
+	•	Code Repository: GitHub Link
 
-	•	Use merge or rebase:
-	•	Merge for larger changes, preserving branch history.
-	•	Rebase for smaller, linear histories.
-	•	Best Practices:
-	•	Always ensure the branch is up-to-date with main or develop before merging.
-	•	Resolve conflicts locally and test thoroughly.
+8. Checklist Before Submission
 
-7. Git Commands Reference
+Developers must verify the following before submitting the PR and page.
 
-Command	Purpose
-git init	Initialize a new Git repository
-git clone <repo>	Clone an existing repository
-git checkout -b <branch>	Create and switch to a new branch
-git add <file>	Stage changes
-git commit -m "<msg>"	Commit staged changes with a message
-git push origin <branch>	Push changes to a remote repository
-git pull	Fetch and merge changes from the remote
-git tag -a <tag>	Create an annotated tag
-git merge <branch>	Merge changes from one branch to another
+Item	Status	Comments
+Code compiles and runs locally	✅ Done	No errors or warnings.
+All requirements are implemented	✅ Done	Pending encoding approval.
+Tests cover the new functionality	🔲 Pending	Scheduled integration tests.
+Documentation is complete	✅ Done	Detailed in this Confluence page.
+Code follows style guidelines	✅ Done	Adhered to PEP8 for R.
 
-8. Example Workflow
+9. Review Guidelines for Reviewer
 
-	1.	Create a feature branch for a new model:
+Provide clear instructions for the reviewer to streamline the process.
+	•	Areas to Focus On:
+	•	Check data scaling logic.
+	•	Verify handling of missing values.
+	•	Known Issues:
+	•	Encoding not yet implemented.
+	•	Expected Time for Review:
+	•	1 hour.
 
-git checkout -b feature/v3_model_training
+10. Action Items for Reviewer
 
+Specify what the reviewer needs to do before approving the PR.
 
-	2.	Make and commit changes:
+Action	Status	Comments
+Review logic in preprocessing	🔲 Pending	Check handling of edge cases.
+Verify testing coverage	🔲 Pending	Ensure all edge cases are tested.
+Confirm documentation adequacy	🔲 Pending	Feedback on PR template usage.
 
-git add .
-git commit -m "feat: add v3 training pipeline"
+11. Approvals
 
+List reviewers and approval status.
 
-	3.	Push changes and create a pull request:
+Reviewer	Role	Approval Status	Comments
+Jane Doe	Data Scientist	🔲 Pending	
+John Smith	Team Lead	🔲 Pending	
 
-git push origin feature/v3_model_training
+12. Post-Merge Checklist
 
+Outline steps to take after the PR is approved and merged.
 
-	4.	Review and merge the PR into develop.
+Step	Status	Comments
+Merge PR into develop branch	🔲 Pending	Only after all approvals are received.
+Tag release milestone	🔲 Pending	Use semantic versioning for the tag.
+Notify team	🔲 Pending	Update in Slack or Confluence.
 
-This sub-page provides a solid foundation for version control best practices, enabling the team to work collaboratively and efficiently. Would you like help creating content for the next topic?
-
-
-
-
-
-
-Here is a restructured and rewritten version of your page tailored to address the challenges your team faced during the big model training and post-analysis project. The focus is on branch strategies and collaboration planning to ensure a smooth and efficient workflow when multiple people are working on the same project simultaneously.
-
-Repository Best Practices for Collaborative Projects
-
-When multiple team members work on the same project, especially a large model training and post-analysis project, poor planning and unstructured collaboration can lead to inefficiency, frustration, and mistakes. To address this, we recommend adopting branching strategies and collaboration guidelines at the start of every project. This document outlines best practices to ensure efficient and organized teamwork.
-
-1. Plan the Project Workflow and Branching Strategy
-
-Define the Project Workflow
-
-	•	Break Down the Project into Phases:
-	•	Examples: Data extraction, preprocessing, exploratory analysis, model training, post-analysis, reporting.
-	•	Identify Independent and Dependent Tasks:
-	•	Independent: Tasks that can proceed without blocking others (e.g., data cleaning, initial EDA).
-	•	Dependent: Tasks that rely on the completion of others (e.g., training the model depends on data preprocessing).
-
-Create a Branching Plan at the Start
-
-	•	Branch Types:
-	•	main: Stable branch for production-ready code.
-	•	develop: Integration branch for combining new features and updates.
-	•	feature/*: For independent tasks or features (e.g., feature/data_cleaning, feature/model_training).
-	•	task/*: For specific sub-tasks within features, when tasks are highly dependent (e.g., task/preprocess_data_for_model under feature/model_training).
-	•	hotfix/*: Urgent fixes for production issues.
-	•	report/*: For sections of the final report (e.g., report/model_performance).
-
-Best Practices for Branching
-
-	1.	Collaborators Shouldn’t Work in the Same Branch: Assign each team member their own branch (e.g., feature or task branches) to avoid conflicts.
-	2.	Group-Dependent Work:
-	•	Use a shared branch (e.g., feature/model_training) for closely related tasks, but coordinate updates and commits using a branch owner.
-	•	Regularly synchronize with the parent branch (develop).
-	3.	Establish Milestone Tags:
-	•	Use tags for significant progress points (e.g., v1.0-data-cleaned, v2.0-model-trained).
-
-2. Define Commit and Merge Guidelines
-
-Commit Guidelines
-
-	•	Frequency: Commit often to save progress but only after testing small changes locally.
-	•	Atomic Changes: Each commit should focus on one logical change (e.g., fixing a bug, adding a new function).
-	•	Descriptive Commit Messages: Use clear and meaningful messages (e.g., feat: add data preprocessing script).
-
-Pull and Merge Guidelines
-
-	•	Regular Pulls: Sync your branch with the latest updates from develop daily or before starting work.
-	•	Conflict Management:
-	•	Resolve conflicts locally and ensure the code works before pushing changes.
-	•	Test merged code thoroughly to avoid downstream errors.
-	•	PR Reviews:
-	•	Define clear reviewers and approvers for each PR.
-	•	Use a checklist for PR reviews (e.g., “Code style followed?”, “Are tests passing?”, “Does it introduce new issues?”).
-
-3. Collaborating on Reports
-
-Challenges of Collaborative Reporting
-
-Reports often involve interdependent sections (e.g., data summaries, model performance, recommendations). Without coordination, multiple contributors can create conflicts or duplicate work.
-
-Best Practices for Reports
-
-	1.	Divide the Report into Sections:
-	•	Create separate files for different sections (e.g., 01_introduction.Rmd, 02_EDA.Rmd, 03_model_training.Rmd).
-	•	Assign owners to each section.
-	2.	Use Branching for Report Changes:
-	•	Example:
-	•	report/eda_summary
-	•	report/model_results
-	•	Merge report branches into a shared report branch regularly.
-	3.	Track Report Dependencies:
-	•	Use comments in the code or Confluence to document which analyses feed into which sections of the report.
-
-4. Recommended Git Workflow for Team Projects
-
-	1.	Start the Project:
-	•	Create main and develop branches.
-	•	Set up a Confluence page to document the branching strategy and task assignments.
-	2.	Assign Tasks:
-	•	Divide the work into features and tasks.
-	•	Assign branches to team members:
-	•	Example:
-	•	Person A: feature/data_cleaning
-	•	Person B: feature/model_training
-	•	Person C: report/model_performance
-	3.	Develop in Parallel:
-	•	Work in individual branches and commit often.
-	•	Pull updates from the parent branch (e.g., develop) daily to minimize merge conflicts.
-	4.	Merge Changes:
-	•	Submit PRs to develop when a task or feature is complete.
-	•	Assign reviewers and ensure all tests pass before merging.
-	5.	Testing and Review:
-	•	Use automated tests for consistent validation of changes.
-	•	Manually review PRs for critical tasks (e.g., model performance evaluation).
-	6.	Finalize and Deploy:
-	•	Merge develop into main after completing all features and passing final tests.
-	•	Tag the release (e.g., v3.0-final-report) for future reference.
-
-5. Key Tips for Efficient Collaboration
-
-Plan Dependencies Early:
-
-	•	Use project management tools (e.g., JIRA, Trello) to track dependent tasks and deadlines.
-
-Automate Where Possible:
-
-	•	Automate repetitive tasks (e.g., preprocessing pipelines, report rendering) to reduce workload.
-
-Weekly Syncs:
-
-	•	Hold regular team meetings to review progress, resolve bottlenecks, and plan next steps.
-
-6. Example Confluence Sub-Pages
-
-	1.	Version Control Best Practices
-	2.	Branch Naming and Strategies
-	3.	PR Review Checklist
-	4.	Collaborative Report Writing
-	5.	Conflict Resolution Tips
-	6.	Task Management for Large Projects
-
-By following this structured approach
-
-
-
-
-
-
-
-Branching Strategy for Collaborative Projects
-
-Effective branching strategies are essential for teams working on multiple tasks within the same repository, especially when tasks are interdependent. Here are detailed guidelines for organizing branches when multiple people are collaborating:
-
-1. Branch Types
-
-Your branching strategy should include the following types:
-	1.	Main Branch (main):
-	•	The stable branch containing production-ready code.
-	•	Only merge tested and reviewed changes into main.
-	2.	Develop Branch (develop):
-	•	The integration branch where features and tasks are merged.
-	•	Serves as the base for all feature branches.
-	•	This branch is tested regularly but is not considered production-ready.
-	3.	Feature Branches (feature/*):
-	•	Used to develop individual features or large tasks.
-	•	Each feature branch focuses on one functionality or independent task.
-	•	Naming convention: feature/<task_name> (e.g., feature/data_cleaning, feature/model_training).
-	4.	Task Branches (task/*):
-	•	Sub-branches of feature branches for specific smaller tasks within a larger feature.
-	•	Useful when a single feature involves multiple contributors.
-	•	Naming convention: task/<feature_name>/<sub_task> (e.g., task/data_cleaning/missing_values).
-	5.	Report Branches (report/*):
-	•	Dedicated branches for writing specific sections of a report or conducting analyses for the report.
-	•	Naming convention: report/<section> (e.g., report/eda_summary, report/model_performance).
-	6.	Bugfix Branches (bugfix/*):
-	•	For resolving bugs found in develop or main.
-	•	Naming convention: bugfix/<issue_description> (e.g., bugfix/fix-null-values).
-	7.	Hotfix Branches (hotfix/*):
-	•	For urgent fixes in production (main branch).
-	•	Naming convention: hotfix/<issue_description> (e.g., hotfix/api-timeout-error).
-	8.	Release Branches (release/*):
-	•	Temporary branches created for final testing before merging into main.
-	•	Naming convention: release/<version> (e.g., release/v3.0).
-
-2. How Many Feature Branches to Create?
-
-The number of feature branches depends on the size of the project, the number of contributors, and the independence of tasks. Here are some guidelines:
-
-When Tasks Are Independent:
-
-	•	One Feature Branch Per Task:
-	•	Example: If three people are working on data cleaning, model training, and exploratory data analysis, create:
-	•	feature/data_cleaning
-	•	feature/model_training
-	•	feature/eda
-	•	Assign each contributor to their respective feature branch.
-
-When Tasks Are Interdependent:
-
-	•	Create a Shared Feature Branch with Task Sub-Branches:
-	•	Example: If multiple people are working on preprocessing (e.g., handling missing values, scaling, and encoding):
-	•	Create a shared feature/data_preprocessing branch.
-	•	Create task branches:
-	•	task/data_preprocessing/missing_values
-	•	task/data_preprocessing/scaling
-	•	task/data_preprocessing/encoding
-
-When Reports Require Collaboration:
-
-	•	Create Separate Report Branches for Each Section:
-	•	Example: If one person is working on EDA results and another on model performance:
-	•	report/eda_summary
-	•	report/model_performance
-	•	Merge these branches into a shared report branch regularly.
-
-3. Key Practices for Managing Multiple Feature Branches
-
-A. Synchronize Regularly
-
-	•	Pull Changes Daily: Ensure that everyone pulls changes from the parent branch (develop) to avoid large merge conflicts later.
-	•	Merge into develop Frequently: Feature branches should not grow too large. Merge regularly to integrate progress.
-
-B. Minimize Dependency Risks
-
-	•	For dependent tasks, plan task order and branch relationships in advance.
-	•	Example: Preprocessing tasks must be completed before training begins.
-	•	Merge preprocessing results into develop before starting model training.
-
-C. Avoid Overlap in Work
-
-	•	Assign clear responsibilities for each branch. If tasks overlap, discuss how to divide work to prevent conflicts.
-
-D. Test Before Merging
-
-	•	Test your feature branch locally or with automated tests before merging into develop.
-
-E. Use Tags for Milestones
-
-	•	Tag key points in the workflow to allow easy reference (e.g., v1.0-preprocessing-complete).
-
-4. Example Branching Plan
-
-Scenario:
-
-Five team members are working on the following tasks for a model training project:
-	1.	Data cleaning (Person A)
-	2.	Exploratory analysis (Person B)
-	3.	Feature engineering (Person C)
-	4.	Model training (Person D)
-	5.	Report writing (Person E)
-
-Proposed Branching Strategy:
-
-	•	main: Stable production-ready branch.
-	•	develop: Integration branch.
-	•	Feature branches:
-	•	feature/data_cleaning (Person A)
-	•	feature/eda (Person B)
-	•	feature/feature_engineering (Person C)
-	•	feature/model_training (Person D)
-	•	feature/report (Person E)
-	•	Task branches (if needed):
-	•	task/feature_engineering/interaction_terms (Person C)
-	•	task/feature_engineering/polynomial_features (Person C)
-	•	task/report/model_performance (Person E)
-	•	PR Reviews:
-	•	Assign one reviewer for each feature branch.
-	•	Example: Person C reviews Person A’s PR for feature/data_cleaning.
-
-5. PR Review and Conflict Resolution
-
-PR Review Guidelines:
-
-	1.	Test Your Code: Ensure your branch runs without errors before submitting a PR.
-	2.	Review Checklist:
-	•	Is the code style consistent?
-	•	Does the code address the task described?
-	•	Are all tests passing?
-
-Conflict Resolution:
-
-	•	Early Synchronization: Pull and merge changes regularly to reduce the chance of conflicts.
-	•	Resolve Locally:
-	•	Use git merge or git rebase to handle conflicts.
-	•	Test thoroughly before pushing changes.
-
-By following this approach, your team can effectively manage branches, reduce conflicts, and streamline collaboration during large-scale projects. Use the Confluence repository page to document the plan, branch assignments, and responsibilities.
-
-
-
-
-, your team can minimize confusion, reduce merge conflicts, and ensure a smooth collaborative workflow for any project, including large-scale model training and post-analysis.
+By requiring developers to document their PRs in this structured Confluence page, the team can:
+	1.	Provide reviewers with complete information.
+	2.	Ensure accountability for requirements and tests.
+	3.	Streamline the review process and minimize confusion.
