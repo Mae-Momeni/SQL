@@ -1,70 +1,236 @@
-1. Would you have the same experience on a VM compared to ADA server?
-Depending on VM computational power, the performance could improve if the VM is powerful and well-configured.
-2. How to use RStudio when using VM on the backend?
-1. There are two solutions, installing RStudio Server on the VM, then connecting to VM through a browser
-2. Connecting to VM through SSH, this solution is much easier, since you do not need to setup  RStudio Server on the VM. We will open our RStudio on our local machine, then we connect to VM through our local RStudi using remote connection (SSH). In this case, everything would be exactly the same as ADA server, except for the fact that on the back end you use VM.
-3. Suppose we want to use VM through SSH connection, how it looks like?
-1. You keep using RStudio on your local computer.
-2. You connect to the VM (server) using SSH to run code.
-3. This is easier because you don’t need to install less programs on the VM.
--
-4. Suppose we want to use VM through SSH connection, What to Install on the VM:?
-• R:
-o Install the R programming language.
-o Suppose we have a VM with Linux operating system, we need to run:
-sudo apt install r-base
-• Required R Libraries:
-o Install the R libraries you need for your work.
-o Use R's package installation commands (install.packages()).
-• SSH Server:
-o Ensure the VM has an SSH server installed and running.
-o For Ubuntu: sudo apt install openssh-server.
-• File Transfer Tools to copy data from local machine or sandbox into VM and vice versa:
-o Tools like scp or rsync for transferring data between your local machine and the VM and vice versa
- 
- 
-5. Should you still use the sandbox?
-- Yes, on your local machine, you still can use sandbox and see the data, folders, etc.
-- Your sandbox and VM are separate environments.
-- But to use data this data in Rstudio and VM, you need to copy data from sandbox into VM
-6. Challenges with the VM:
-• Installing R language, R libraries, SSH.
-• Making sure it’s secure, set up passwords, etc
-• Ensuring the VM is fast enough for your work.
-• Not forget to turn off VM after using
-• Keeping a confluence page for documentation
-7. How much time required to setup VM?
-1. 1 to 2 days
- 
-VM versus VS
-What is a Virtual Machine (VM)?
-A VM is like a complete computer running on the cloud. It behaves like a physical computer with its own operating system (e.g., Linux or Windows). You can log in, install software, and run programs just like on your laptop.
-• Ease of Use: A VM feels familiar since you interact with it like a regular computer (command line or desktop).
-• Setup: You install R, RStudio, and any other tools directly on the VM.
-• Control: You have full control over the operating system and software.
-What is a Virtual Server?
-A virtual server is a cloud service designed for specific tasks (like running apps). It does not give you direct access to the operating system, so you can't install software freely. Instead, you configure your tools (like R or Python) to run within the service's restrictions.
-• Ease of Use: Harder if you’re new to cloud setups because you need to learn cloud-specific configurations.
-• Setup: You deploy your code (e.g., R scripts) as an app or service, often using container technology like Docker.
-• Control: Limited. You don’t directly manage the OS or install libraries; you must work within the service’s framework.
- 
-If your IT team won't assist with the setup and your data science (DS) team lacks experience, using a VM is likely the better option. Here's why:
-Why Choose a VM in This Case?
-1. Simpler Learning Curve:
-o VMs are straightforward for beginners with clear step-by-step tutorials available.
-o Virtual servers (managed platforms) often require deeper knowledge of cloud deployment, orchestration, and configuration.
-2. Full Control:
-o With a VM, your team has full access to install tools like RStudio, libraries, and dependencies without worrying about platform restrictions.
-3. Community Support:
-o Setting up VMs (especially Linux ones) is well-documented and widely used in data science, making it easier to troubleshoot issues.
-4. Flexible Workflows:
-o VMs allow you to mimic your local environment closely, which simplifies transitioning workflows from local machines to the cloud.
-Challenges Your Team Might Face with Virtual Servers:
-• Deploying R or Python as applications within containers (e.g., Docker).
-• Configuring environment variables, scaling, and service integrations.
-• Debugging errors related to managed platform restrictions.
-Recommendation:
-Stick to a VM setup since it's easier to manage for a team without prior experience in virtual server deployments. Focus on learning how to install R, RStudio, and SSH access on the VM. There are plenty of beginner-friendly resources for this approach.
-For beginners, VMs are easier and more flexible. Stick with a VM until your team has more cloud experience.
- 
- 
+Here’s a structured Confluence page with practical examples and code snippets for improving an already created data science project in Object-Oriented Programming (OOP), Next-Level Modularity, and Using config.yaml in RStudio. The goal is to elevate the project’s structure, maintainability, and scalability.
+
+Improving Your Data Science Project
+
+This guide covers three key areas to elevate your data science project:
+	1.	Object-Oriented Programming (OOP) in R
+	2.	Next-Level Modularity Practices
+	3.	Using a config.yaml File
+
+Each section includes practical examples to enhance your existing project.
+
+1. Object-Oriented Programming (OOP) in R
+
+Why Use OOP in R?
+
+	•	Encapsulates data and methods in objects, improving reusability and maintainability.
+	•	Simplifies the management of complex data structures and processes.
+	•	Facilitates the design of scalable pipelines.
+
+Key OOP Systems in R
+
+	1.	S3 System:
+	•	Flexible and widely used.
+	2.	R6 System:
+	•	True object-oriented system with encapsulation and inheritance.
+	3.	S4 System:
+	•	Rigorous and formal, used in advanced applications.
+
+Practical Example: R6 for a Preprocessing Pipeline
+
+Current Workflow Without OOP:
+
+clean_data <- function(data) {
+  data <- data %>%
+    filter(!is.na(target)) %>%
+    mutate(across(where(is.character), as.factor))
+  return(data)
+}
+
+preprocess_data <- function(data) {
+  data <- clean_data(data)
+  data <- scale(select(data, where(is.numeric)))
+  return(data)
+}
+
+Refactored Workflow with R6:
+
+library(R6)
+
+# Define Preprocessor Class
+Preprocessor <- R6Class(
+  "Preprocessor",
+  public = list(
+    data = NULL,
+    initialize = function(data) {
+      self$data <- data
+    },
+    clean_data = function() {
+      self$data <- self$data %>%
+        filter(!is.na(target)) %>%
+        mutate(across(where(is.character), as.factor))
+      invisible(self)
+    },
+    scale_numeric = function() {
+      self$data <- self$data %>%
+        mutate(across(where(is.numeric), scale))
+      invisible(self)
+    },
+    get_data = function() {
+      return(self$data)
+    }
+  )
+)
+
+# Usage Example
+data <- read.csv("data/raw_data.csv")
+preprocessor <- Preprocessor$new(data)
+processed_data <- preprocessor$clean_data()$scale_numeric()$get_data()
+
+Benefits:
+
+	•	Encapsulation: Encapsulates all preprocessing logic within the Preprocessor class.
+	•	Chaining: Allows method chaining for cleaner code.
+	•	Reusability: Can be extended for different preprocessing pipelines.
+
+2. Next-Level Modularity Practices
+
+Why Improve Modularity?
+
+	•	Makes code more reusable and easier to debug.
+	•	Improves flexibility by making functions more parametric.
+	•	Simplifies testing and scaling.
+
+Common Issues in Existing Modularity
+
+	1.	Functions have hardcoded parameters.
+	2.	Functions are not designed for generalization.
+	3.	High coupling between modules.
+
+Improvement Example: Flexible Functions
+
+Before: Hardcoded Parameters
+
+split_data <- function(data) {
+  train <- data[1:floor(0.7 * nrow(data)), ]
+  test <- data[(floor(0.7 * nrow(data)) + 1):nrow(data), ]
+  return(list(train = train, test = test))
+}
+
+After: Parametric and Flexible
+
+split_data <- function(data, train_size = 0.7, seed = NULL) {
+  if (!is.null(seed)) set.seed(seed)
+  train_index <- sample(1:nrow(data), size = floor(train_size * nrow(data)))
+  train <- data[train_index, ]
+  test <- data[-train_index, ]
+  return(list(train = train, test = test))
+}
+
+# Example Usage
+data <- iris
+splits <- split_data(data, train_size = 0.8, seed = 42)
+
+Improvement Example: Grouping Related Functions
+
+Before: Scattered Functions
+
+compute_mean <- function(data, column) {
+  mean(data[[column]], na.rm = TRUE)
+}
+
+compute_sd <- function(data, column) {
+  sd(data[[column]], na.rm = TRUE)
+}
+
+After: Group Functions in a List or Package
+
+stats_functions <- list(
+  mean = function(data, column) {
+    mean(data[[column]], na.rm = TRUE)
+  },
+  sd = function(data, column) {
+    sd(data[[column]], na.rm = TRUE)
+  }
+)
+
+# Example Usage
+mean_value <- stats_functions$mean(iris, "Sepal.Length")
+sd_value <- stats_functions$sd(iris, "Sepal.Length")
+
+3. Using a config.yaml File
+
+Why Use a config.yaml File?
+
+	•	Centralizes project settings and parameters.
+	•	Simplifies environment management.
+	•	Avoids hardcoding, making the project more scalable.
+
+Practical Example: Refactor with config.yaml
+
+Step 1: Create config.yaml
+
+default: &default
+  data:
+    raw_path: "data/raw_data.csv"
+    processed_path: "data/processed_data.csv"
+  model:
+    type: "xgboost"
+    parameters:
+      nrounds: 100
+      max_depth: 6
+      eta: 0.1
+
+development:
+  <<: *default
+  model:
+    parameters:
+      nrounds: 50  # Reduced for quick testing
+
+production:
+  <<: *default
+  model:
+    parameters:
+      nrounds: 200
+
+Step 2: Load Configuration
+
+library(yaml)
+
+load_config <- function(env = "default") {
+  config <- yaml::read_yaml("config.yaml")
+  return(config[[env]])
+}
+
+# Load Production Config
+config <- load_config("production")
+print(config)
+
+Step 3: Refactor Code
+
+# Use Config Settings
+data <- read.csv(config$data$raw_path)
+
+# Train XGBoost Model
+library(xgboost)
+model <- xgboost(
+  data = as.matrix(data),
+  nrounds = config$model$parameters$nrounds,
+  max_depth = config$model$parameters$max_depth,
+  eta = config$model$parameters$eta,
+  objective = "binary:logistic"
+)
+
+4. Implementation Plan
+
+	1.	Object-Oriented Refactoring:
+	•	Identify repetitive workflows (e.g., preprocessing, modeling).
+	•	Create R6 classes to encapsulate logic.
+	2.	Function Improvements:
+	•	Review all functions for hardcoded parameters.
+	•	Refactor into parameterized and reusable functions.
+	3.	Integrate config.yaml:
+	•	Replace hardcoded values (e.g., file paths, model parameters) with config.yaml.
+	4.	Examples in Repository:
+	•	Add examples demonstrating the use of:
+	•	R6 classes for preprocessing.
+	•	Improved modular functions for data splitting or metric computation.
+	•	config.yaml for centralized configuration.
+
+Expected Benefits
+
+	•	Scalability: Easily adapt the project to new requirements or environments.
+	•	Maintainability: Simplified debugging and updates with modular, flexible code.
+	•	Collaboration: Improved clarity and usability for team members.
+
+By following these practices, your team can elevate the quality and maintainability of your R projects. Let me know if you need help implementing these changes!
