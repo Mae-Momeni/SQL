@@ -1,137 +1,70 @@
-Structured Template for Confluence Page for Pull Request Reviews
-
-This document outlines the required structure for Confluence pages associated with each pull request (PR). Developers must fill out the page for every PR they create. This ensures that all reviewers have complete context and necessary information for efficient and thorough code reviews.
-
-Pull Request Review Documentation Template
-
-PR Title:
-
-	•	Example: feat: Add v3 data preprocessing pipeline
-
-1. Project Overview
-
-Provide an overview of the project or feature the PR is addressing.
-	•	Project Name:
-	•	Example: V3 Model Development
-	•	Purpose:
-	•	Example: Implement data preprocessing steps for the v3 model pipeline.
-	•	Related JIRA/Trello/Task ID (if applicable):
-	•	Example: JIRA-123
-
-2. Purpose of the Changes
-
-Clearly state the purpose of this PR.
-	•	Why are these changes being made?
-	•	Example: This PR introduces data preprocessing steps to handle missing values, scale numerical features, and encode categorical variables for the v3 model pipeline.
-	•	What problem does this solve?
-	•	Example: It ensures the dataset is prepared correctly for model training and evaluation.
-	•	What specific outcome do we want?
-	•	Example: Clean and transformed data ready for input into the v3 model.
-
-3. Requirements Checklist
-
-Document the requirements this PR fulfills. Provide a clear checklist of tasks or conditions related to the feature or code being added.
-
-Requirement	Status	Comments
-Handle missing values	✅ Completed	Mean imputation implemented.
-Scale numerical features	✅ Completed	StandardScaler applied.
-Encode categorical variables	🔲 Pending	Awaiting feature list approval from team lead.
-
-4. Code Changes Summary
-
-Summarize the changes made in the codebase. Include references to specific files or parts of the code.
-	•	Files Modified:
-	•	preprocessing_pipeline.R
-	•	feature_engineering.R
-	•	Key Changes:
-	•	Added mean imputation for missing values.
-	•	StandardScaler for numerical features.
-	•	Placeholder for encoding categorical variables.
-	•	Lines of Code (LOC):
-	•	Added: +200
-	•	Deleted: -50
-
-5. Tests and Validation
-
-Provide information about tests conducted for the PR and their results.
-	•	Unit Tests:
-	•	✅ test_preprocessing.R: Passed
-	•	Integration Tests:
-	•	🔲 Pending (Scheduled for 2024-11-15)
-	•	Edge Case Tests:
-	•	✅ Null value handling
-	•	🔲 Large dataset scaling
-	•	Testing Results Summary:
-
-All unit tests passed. Integration tests scheduled for 2024-11-15. Edge case tests pending final dataset.
-
-6. Developer Comments
-
-Include any additional comments or insights to help reviewers understand the code.
-	•	Assumptions:
-	•	All numerical columns are standardized with no outliers.
-	•	Known Limitations:
-	•	Encoding for categorical variables is pending team approval.
-	•	Areas for Feedback:
-	•	Review logic for scaling and transformation of numerical data.
-
-7. Links to Supporting Materials
-
-Include links to related files, tasks, or documentation.
-	•	JIRA Task: JIRA-123
-	•	Data Treatment Plan: Confluence Page: Data Treatment for V3
-	•	Test Results: Link to Test Outputs
-	•	Code Repository: GitHub Link
-
-8. Checklist Before Submission
-
-Developers must verify the following before submitting the PR and page.
-
-Item	Status	Comments
-Code compiles and runs locally	✅ Done	No errors or warnings.
-All requirements are implemented	✅ Done	Pending encoding approval.
-Tests cover the new functionality	🔲 Pending	Scheduled integration tests.
-Documentation is complete	✅ Done	Detailed in this Confluence page.
-Code follows style guidelines	✅ Done	Adhered to PEP8 for R.
-
-9. Review Guidelines for Reviewer
-
-Provide clear instructions for the reviewer to streamline the process.
-	•	Areas to Focus On:
-	•	Check data scaling logic.
-	•	Verify handling of missing values.
-	•	Known Issues:
-	•	Encoding not yet implemented.
-	•	Expected Time for Review:
-	•	1 hour.
-
-10. Action Items for Reviewer
-
-Specify what the reviewer needs to do before approving the PR.
-
-Action	Status	Comments
-Review logic in preprocessing	🔲 Pending	Check handling of edge cases.
-Verify testing coverage	🔲 Pending	Ensure all edge cases are tested.
-Confirm documentation adequacy	🔲 Pending	Feedback on PR template usage.
-
-11. Approvals
-
-List reviewers and approval status.
-
-Reviewer	Role	Approval Status	Comments
-Jane Doe	Data Scientist	🔲 Pending	
-John Smith	Team Lead	🔲 Pending	
-
-12. Post-Merge Checklist
-
-Outline steps to take after the PR is approved and merged.
-
-Step	Status	Comments
-Merge PR into develop branch	🔲 Pending	Only after all approvals are received.
-Tag release milestone	🔲 Pending	Use semantic versioning for the tag.
-Notify team	🔲 Pending	Update in Slack or Confluence.
-
-By requiring developers to document their PRs in this structured Confluence page, the team can:
-	1.	Provide reviewers with complete information.
-	2.	Ensure accountability for requirements and tests.
-	3.	Streamline the review process and minimize confusion.
+1. Would you have the same experience on a VM compared to ADA server?
+Depending on VM computational power, the performance could improve if the VM is powerful and well-configured.
+2. How to use RStudio when using VM on the backend?
+1. There are two solutions, installing RStudio Server on the VM, then connecting to VM through a browser
+2. Connecting to VM through SSH, this solution is much easier, since you do not need to setup  RStudio Server on the VM. We will open our RStudio on our local machine, then we connect to VM through our local RStudi using remote connection (SSH). In this case, everything would be exactly the same as ADA server, except for the fact that on the back end you use VM.
+3. Suppose we want to use VM through SSH connection, how it looks like?
+1. You keep using RStudio on your local computer.
+2. You connect to the VM (server) using SSH to run code.
+3. This is easier because you don’t need to install less programs on the VM.
+-
+4. Suppose we want to use VM through SSH connection, What to Install on the VM:?
+• R:
+o Install the R programming language.
+o Suppose we have a VM with Linux operating system, we need to run:
+sudo apt install r-base
+• Required R Libraries:
+o Install the R libraries you need for your work.
+o Use R's package installation commands (install.packages()).
+• SSH Server:
+o Ensure the VM has an SSH server installed and running.
+o For Ubuntu: sudo apt install openssh-server.
+• File Transfer Tools to copy data from local machine or sandbox into VM and vice versa:
+o Tools like scp or rsync for transferring data between your local machine and the VM and vice versa
+ 
+ 
+5. Should you still use the sandbox?
+- Yes, on your local machine, you still can use sandbox and see the data, folders, etc.
+- Your sandbox and VM are separate environments.
+- But to use data this data in Rstudio and VM, you need to copy data from sandbox into VM
+6. Challenges with the VM:
+• Installing R language, R libraries, SSH.
+• Making sure it’s secure, set up passwords, etc
+• Ensuring the VM is fast enough for your work.
+• Not forget to turn off VM after using
+• Keeping a confluence page for documentation
+7. How much time required to setup VM?
+1. 1 to 2 days
+ 
+VM versus VS
+What is a Virtual Machine (VM)?
+A VM is like a complete computer running on the cloud. It behaves like a physical computer with its own operating system (e.g., Linux or Windows). You can log in, install software, and run programs just like on your laptop.
+• Ease of Use: A VM feels familiar since you interact with it like a regular computer (command line or desktop).
+• Setup: You install R, RStudio, and any other tools directly on the VM.
+• Control: You have full control over the operating system and software.
+What is a Virtual Server?
+A virtual server is a cloud service designed for specific tasks (like running apps). It does not give you direct access to the operating system, so you can't install software freely. Instead, you configure your tools (like R or Python) to run within the service's restrictions.
+• Ease of Use: Harder if you’re new to cloud setups because you need to learn cloud-specific configurations.
+• Setup: You deploy your code (e.g., R scripts) as an app or service, often using container technology like Docker.
+• Control: Limited. You don’t directly manage the OS or install libraries; you must work within the service’s framework.
+ 
+If your IT team won't assist with the setup and your data science (DS) team lacks experience, using a VM is likely the better option. Here's why:
+Why Choose a VM in This Case?
+1. Simpler Learning Curve:
+o VMs are straightforward for beginners with clear step-by-step tutorials available.
+o Virtual servers (managed platforms) often require deeper knowledge of cloud deployment, orchestration, and configuration.
+2. Full Control:
+o With a VM, your team has full access to install tools like RStudio, libraries, and dependencies without worrying about platform restrictions.
+3. Community Support:
+o Setting up VMs (especially Linux ones) is well-documented and widely used in data science, making it easier to troubleshoot issues.
+4. Flexible Workflows:
+o VMs allow you to mimic your local environment closely, which simplifies transitioning workflows from local machines to the cloud.
+Challenges Your Team Might Face with Virtual Servers:
+• Deploying R or Python as applications within containers (e.g., Docker).
+• Configuring environment variables, scaling, and service integrations.
+• Debugging errors related to managed platform restrictions.
+Recommendation:
+Stick to a VM setup since it's easier to manage for a team without prior experience in virtual server deployments. Focus on learning how to install R, RStudio, and SSH access on the VM. There are plenty of beginner-friendly resources for this approach.
+For beginners, VMs are easier and more flexible. Stick with a VM until your team has more cloud experience.
+ 
+ 
