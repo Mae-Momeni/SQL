@@ -1,1 +1,97 @@
-gfd
+To use the R6 class for training with a specified set of parameters or default parameters, you can control the configuration by passing arguments in the train_model method or by modifying the config.yaml file.
+
+Here’s how:
+
+1. Training with Specified Parameters
+
+If you want to train with specific parameters:
+
+Steps:
+
+	1.	Update the config.yaml file or directly pass the parameters in your R6 method for training.
+	2.	Set cv_number = 1 to skip cross-validation and use the specified parameters.
+
+Example in Code:
+
+If you want to set specific parameters for training, include them in the tuneGrid section of the config.yaml file:
+
+modeling:
+  training:
+    cross_validation:
+      tune_grid:
+        nrounds: [100] # Fixed parameter
+        max_depth: [6] # Fixed parameter
+        eta: [0.03]    # Fixed parameter
+        gamma: [0.1]   # Fixed parameter
+        colsample_bytree: [0.8] # Fixed parameter
+        min_child_weight: [1]   # Fixed parameter
+        subsample: [0.9]        # Fixed parameter
+
+Then call:
+
+claims_model$train_model(number_cv = 1)
+
+The model will train with exactly these parameters.
+
+2. Training with Default Parameters
+
+If you want to train with default parameters:
+
+Steps:
+
+	1.	Leave the tune_grid empty or remove it from the config.yaml file.
+	2.	Modify the train_model method to use default parameters if none are specified.
+
+Example in Code:
+
+Default parameters in config.yaml:
+
+modeling:
+  training:
+    cross_validation:
+      tune_grid: null # Or leave this section blank
+
+In your R6 class, check if the tune_grid is null or empty and use default parameters:
+
+setup_tune_grid = function() {
+  if (is.null(self$config$modeling$training$cross_validation$tune_grid)) {
+    # Use default parameters if none are specified
+    self$tune_grid <- expand.grid(
+      nrounds = 100,
+      max_depth = 6,
+      eta = 0.03,
+      gamma = 0.1,
+      colsample_bytree = 0.8,
+      min_child_weight = 1,
+      subsample = 0.9
+    )
+  } else {
+    # Use parameters from config.yaml
+    self$tune_grid <- expand.grid(
+      nrounds = self$config$modeling$training$cross_validation$tune_grid$nrounds,
+      max_depth = self$config$modeling$training$cross_validation$tune_grid$max_depth,
+      eta = self$config$modeling$training$cross_validation$tune_grid$eta,
+      gamma = self$config$modeling$training$cross_validation$tune_grid$gamma,
+      colsample_bytree = self$config$modeling$training$cross_validation$tune_grid$colsample_bytree,
+      min_child_weight = self$config$modeling$training$cross_validation$tune_grid$min_child_weight,
+      subsample = self$config$modeling$training$cross_validation$tune_grid$subsample
+    )
+  }
+}
+
+Then call:
+
+claims_model$train_model(number_cv = 1)
+
+If the tune_grid is not defined in config.yaml, the model will fall back to default parameters.
+
+Summary
+
+	1.	To Train with Specific Parameters:
+	•	Define parameters in config.yaml under tune_grid.
+	•	Call train_model(number_cv = 1).
+	2.	To Train with Default Parameters:
+	•	Leave tune_grid in config.yaml blank or null.
+	•	The class will automatically fall back to hardcoded default parameters.
+
+Would you like me to modify or refine any part of the implementation?
