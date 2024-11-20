@@ -1,236 +1,137 @@
-Here’s a structured Confluence page with practical examples and code snippets for improving an already created data science project in Object-Oriented Programming (OOP), Next-Level Modularity, and Using config.yaml in RStudio. The goal is to elevate the project’s structure, maintainability, and scalability.
+Here’s a revised, accurate, and simplified version of the R6 class with a corresponding config.yaml file:
 
-Improving Your Data Science Project
+Step 1: Config File (config.yaml)
 
-This guide covers three key areas to elevate your data science project:
-	1.	Object-Oriented Programming (OOP) in R
-	2.	Next-Level Modularity Practices
-	3.	Using a config.yaml File
+Save this file in a config folder inside your project.
 
-Each section includes practical examples to enhance your existing project.
+modeling:
+  title: "Modeling auto claims"
+  models:
+    prob_model_name: "mod_prob_auto_indemnity"
+    sev_model_name: "mod_sev_auto_indemnity"
+  data:
+    seed: 1818
+    filter_role: "train"
+    columns_to_select:
+      - TIME_CUTOFF
+      - NETLOSSPAID
+      - INCURRED_LOSS
+      - EXP_REPORTED_DT
+      - POLICYNUMBER
+      - DESCRIPTION_INC
+      - DESCRIPTION_CUM
+      - RL_SETTLED_DATE
+      - RL_SETTLE_DATE
+      - POLICY_ID_M
+      - CASERES
+    variable_group: "CLAIMNUMBER"
+  paths:
+    find_unique_vars: "funs/find_unique_vars.R"
+    create_index: "funs/create_index.R"
 
-1. Object-Oriented Programming (OOP) in R
+Step 2: Simplified R6 Class
 
-Why Use OOP in R?
-
-	•	Encapsulates data and methods in objects, improving reusability and maintainability.
-	•	Simplifies the management of complex data structures and processes.
-	•	Facilitates the design of scalable pipelines.
-
-Key OOP Systems in R
-
-	1.	S3 System:
-	•	Flexible and widely used.
-	2.	R6 System:
-	•	True object-oriented system with encapsulation and inheritance.
-	3.	S4 System:
-	•	Rigorous and formal, used in advanced applications.
-
-Practical Example: R6 for a Preprocessing Pipeline
-
-Current Workflow Without OOP:
-
-clean_data <- function(data) {
-  data <- data %>%
-    filter(!is.na(target)) %>%
-    mutate(across(where(is.character), as.factor))
-  return(data)
-}
-
-preprocess_data <- function(data) {
-  data <- clean_data(data)
-  data <- scale(select(data, where(is.numeric)))
-  return(data)
-}
-
-Refactored Workflow with R6:
+This is a streamlined version of the R6 class focusing on simplicity and readability while keeping it functional.
 
 library(R6)
+library(yaml)
+library(dplyr)
 
-# Define Preprocessor Class
-Preprocessor <- R6Class(
-  "Preprocessor",
+# Define the R6 class
+AutoClaimsModel <- R6Class(
+  "AutoClaimsModel",
   public = list(
-    data = NULL,
-    initialize = function(data) {
-      self$data <- data
+    config = NULL,
+    data_train = NULL,
+    indexes = NULL,
+
+    # Initialization: load configuration file
+    initialize = function(config_file) {
+      self$config <- yaml::read_yaml(config_file)
+      set.seed(self$config$modeling$data$seed)
+      message("Configuration loaded and seed set.")
     },
-    clean_data = function() {
-      self$data <- self$data %>%
-        filter(!is.na(target)) %>%
-        mutate(across(where(is.character), as.factor))
-      invisible(self)
+
+    # Step 1: Filter and select relevant columns from data
+    prepare_data = function(data_baked) {
+      self$data_train <- data_baked %>%
+        filter(data_role == self$config$data$filter_role) %>%
+        select(all_of(self$config$data$columns_to_select)) %>%
+        filter(model_prob == self$config$modeling$models$prob_model_name)
+      message("Data prepared. Dimensions: ", paste(dim(self$data_train), collapse = " x "))
     },
-    scale_numeric = function() {
-      self$data <- self$data %>%
-        mutate(across(where(is.numeric), scale))
-      invisible(self)
+
+    # Step 2: Remove single-modality variables
+    remove_single_modality_vars = function() {
+      source(self$config$paths$find_unique_vars)
+      vars_to_delete <- find_unique_vars(self$data_train)
+      self$data_train <- self$data_train %>%
+        select(-all_of(vars_to_delete))
+      message("Single-modality variables removed.")
     },
-    get_data = function() {
-      return(self$data)
+
+    # Step 3: Preprocess data
+    preprocess_data = function() {
+      self$data_train <- self$data_train %>%
+        mutate(paid_left = ifelse(AMT_LEFT_TO_PAY > 0, "Yes payment", "No payment")) %>%
+        filter(!is.na(paid_left))
+      message("Data preprocessing complete.")
+    },
+
+    # Step 4: Create indexes
+    create_indexes = function(number_cv) {
+      source(self$config$paths$create_index)
+      self$indexes <- create_index(
+        self$data_train,
+        number_cv = number_cv,
+        variable_group = self$config$data$variable_group
+      )
+      message("Indexes created for cross-validation.")
     }
   )
 )
 
-# Usage Example
-data <- read.csv("data/raw_data.csv")
-preprocessor <- Preprocessor$new(data)
-processed_data <- preprocessor$clean_data()$scale_numeric()$get_data()
+Step 3: Usage Example
 
-Benefits:
+Here’s how you can use the class step-by-step.
 
-	•	Encapsulation: Encapsulates all preprocessing logic within the Preprocessor class.
-	•	Chaining: Allows method chaining for cleaner code.
-	•	Reusability: Can be extended for different preprocessing pipelines.
+# Load required libraries
+library(dplyr)
 
-2. Next-Level Modularity Practices
+# Example: Load your dataset (replace with actual data loading logic)
+data_baked <- <your_data_loading_logic_here>
 
-Why Improve Modularity?
+# Step 1: Initialize the model with the config file
+claims_model <- AutoClaimsModel$new("config/config.yaml")
 
-	•	Makes code more reusable and easier to debug.
-	•	Improves flexibility by making functions more parametric.
-	•	Simplifies testing and scaling.
+# Step 2: Prepare data
+claims_model$prepare_data(data_baked)
 
-Common Issues in Existing Modularity
+# Step 3: Remove single-modality variables
+claims_model$remove_single_modality_vars()
 
-	1.	Functions have hardcoded parameters.
-	2.	Functions are not designed for generalization.
-	3.	High coupling between modules.
+# Step 4: Preprocess the data
+claims_model$preprocess_data()
 
-Improvement Example: Flexible Functions
+# Step 5: Create indexes for cross-validation
+claims_model$create_indexes(number_cv = 5)
 
-Before: Hardcoded Parameters
+# Access processed data and indexes
+processed_data <- claims_model$data_train
+indexes <- claims_model$indexes
 
-split_data <- function(data) {
-  train <- data[1:floor(0.7 * nrow(data)), ]
-  test <- data[(floor(0.7 * nrow(data)) + 1):nrow(data), ]
-  return(list(train = train, test = test))
-}
+Explanation of Simplifications:
 
-After: Parametric and Flexible
+	1.	Config Structure:
+	•	Simplified to include only the parameters relevant to your current workflow.
+	•	Keeps paths and column names organized and modifiable without editing the code.
+	2.	Class Design:
+	•	Functions are modular and easy to follow.
+	•	Removed unnecessary complexity by focusing on key transformations.
+	3.	Readability:
+	•	Clear method names (prepare_data, remove_single_modality_vars, etc.).
+	•	Added message() calls for feedback at each step.
+	4.	Maintainability:
+	•	Allows for easy updates to logic and parameters by editing the config.yaml file.
 
-split_data <- function(data, train_size = 0.7, seed = NULL) {
-  if (!is.null(seed)) set.seed(seed)
-  train_index <- sample(1:nrow(data), size = floor(train_size * nrow(data)))
-  train <- data[train_index, ]
-  test <- data[-train_index, ]
-  return(list(train = train, test = test))
-}
-
-# Example Usage
-data <- iris
-splits <- split_data(data, train_size = 0.8, seed = 42)
-
-Improvement Example: Grouping Related Functions
-
-Before: Scattered Functions
-
-compute_mean <- function(data, column) {
-  mean(data[[column]], na.rm = TRUE)
-}
-
-compute_sd <- function(data, column) {
-  sd(data[[column]], na.rm = TRUE)
-}
-
-After: Group Functions in a List or Package
-
-stats_functions <- list(
-  mean = function(data, column) {
-    mean(data[[column]], na.rm = TRUE)
-  },
-  sd = function(data, column) {
-    sd(data[[column]], na.rm = TRUE)
-  }
-)
-
-# Example Usage
-mean_value <- stats_functions$mean(iris, "Sepal.Length")
-sd_value <- stats_functions$sd(iris, "Sepal.Length")
-
-3. Using a config.yaml File
-
-Why Use a config.yaml File?
-
-	•	Centralizes project settings and parameters.
-	•	Simplifies environment management.
-	•	Avoids hardcoding, making the project more scalable.
-
-Practical Example: Refactor with config.yaml
-
-Step 1: Create config.yaml
-
-default: &default
-  data:
-    raw_path: "data/raw_data.csv"
-    processed_path: "data/processed_data.csv"
-  model:
-    type: "xgboost"
-    parameters:
-      nrounds: 100
-      max_depth: 6
-      eta: 0.1
-
-development:
-  <<: *default
-  model:
-    parameters:
-      nrounds: 50  # Reduced for quick testing
-
-production:
-  <<: *default
-  model:
-    parameters:
-      nrounds: 200
-
-Step 2: Load Configuration
-
-library(yaml)
-
-load_config <- function(env = "default") {
-  config <- yaml::read_yaml("config.yaml")
-  return(config[[env]])
-}
-
-# Load Production Config
-config <- load_config("production")
-print(config)
-
-Step 3: Refactor Code
-
-# Use Config Settings
-data <- read.csv(config$data$raw_path)
-
-# Train XGBoost Model
-library(xgboost)
-model <- xgboost(
-  data = as.matrix(data),
-  nrounds = config$model$parameters$nrounds,
-  max_depth = config$model$parameters$max_depth,
-  eta = config$model$parameters$eta,
-  objective = "binary:logistic"
-)
-
-4. Implementation Plan
-
-	1.	Object-Oriented Refactoring:
-	•	Identify repetitive workflows (e.g., preprocessing, modeling).
-	•	Create R6 classes to encapsulate logic.
-	2.	Function Improvements:
-	•	Review all functions for hardcoded parameters.
-	•	Refactor into parameterized and reusable functions.
-	3.	Integrate config.yaml:
-	•	Replace hardcoded values (e.g., file paths, model parameters) with config.yaml.
-	4.	Examples in Repository:
-	•	Add examples demonstrating the use of:
-	•	R6 classes for preprocessing.
-	•	Improved modular functions for data splitting or metric computation.
-	•	config.yaml for centralized configuration.
-
-Expected Benefits
-
-	•	Scalability: Easily adapt the project to new requirements or environments.
-	•	Maintainability: Simplified debugging and updates with modular, flexible code.
-	•	Collaboration: Improved clarity and usability for team members.
-
-By following these practices, your team can elevate the quality and maintainability of your R projects. Let me know if you need help implementing these changes!
+Send the next part of your code, and I’ll extend the class and config.yaml file accordingly.
