@@ -1,1 +1,39 @@
-gg
+ModelTraining <- R6::R6Class(
+  classname = "ModelTraining",
+  public = list(
+    config = NULL,
+    data_train = NULL,
+    formula = NULL,
+    
+    # Initialize the class with the configuration file
+    initialize = function(config_file) {
+      self$config <- yaml::read_yaml(config_file)
+      message("Configuration loaded successfully.")
+    },
+    
+    # Method to set formula for training
+    set_formula = function() {
+      self$formula <- as.formula(self$config$formula)
+      message("Formula set: ", deparse(self$formula))
+    },
+    
+    # Method to remove variables in the formula that are not in the data
+    validate_formula = function() {
+      all_vars <- all.vars(self$formula)
+      extra_vars <- setdiff(all_vars, colnames(self$data_train))
+      
+      if (length(extra_vars) > 0) {
+        for (var in extra_vars) {
+          self$formula <- stats::update(self$formula, paste0(". ~ . -", var))
+          message("Removed variable ", var, " from the formula.")
+        }
+      }
+      
+      message("Validated formula: ", deparse(self$formula))
+    }
+  )
+)
+
+formula: "paid_left ~ lossmonth + GR_HOWREPORTEDTYPE_TYPECODE + GR_LOSS_LOC_PROV_M + NUM_COST_CATS + REP_VEHICLEDRIVEABLE"
+data:
+  training_data_path: "path/to/training_data.csv"
