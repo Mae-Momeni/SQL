@@ -1,9 +1,97 @@
-# Load the YAML file
-config <- yaml::read_yaml("config/config.yaml")
+Here is the unified function for extracting data from different server paths, based on a server_key parameter. I also include how you can update your YAML configuration file to store the server paths.
 
-# Access modeling-related configurations
-modeling_config <- config$modeling
+Unified Function
 
-# Access paths for models
-v2_path <- config$model_paths$v2_path
-selected_path <- config$model_paths$selected_path
+extract_workzone_table <- function(table_name, server_key, config_file = "config/config.yaml") {
+  # Load configuration
+  config <- yaml::read_yaml(config_file)
+  
+  # Retrieve the server path based on the server key
+  server_path <- config$server_paths[[server_key]]
+  
+  if (is.null(server_path)) {
+    stop(glue::glue("Invalid server_key: {server_key}. Check the config file."))
+  }
+  
+  # Create the pool
+  pool <- pool::dbPool(
+    drv = odbc::odbc(),
+    driver = server_path$driver,
+    database = server_path$database,
+    uid = Sys.getenv(server_path$uid_env),
+    pwd = Sys.getenv(server_path$pwd_env),
+    server = server_path$server,
+    Authentication = server_path$authentication,
+    port = server_path$port,
+    idleTimeout = server_path$idleTimeout,
+    encoding = server_path$encoding,
+    encrypt = server_path$encrypt
+  )
+  
+  # Extract the dataset
+  db_data <- dbGetQuery(pool, glue::glue("SELECT * FROM WZ_CLAIMS.{table_name};")) %>%
+    clean_names(case = "snake")
+  
+  # Close the pool
+  pool::poolClose(pool)
+  
+  message(glue::glue("Data extracted from {server_key} for table {table_name}."))
+  return(db_data)
+}
+
+Updated YAML Configuration
+
+server_paths:
+  dev_server:
+    driver: "ODBC Driver 17 for SQL Server"
+    database: "azdwappprod01sql30"
+    uid_env: "AZURE_DEV_USER"
+    pwd_env: "AZURE_DEV_PWD"
+    server: "azdwappprod01dev.synapse.net"
+    authentication: "ActiveDirectoryPassword"
+    port: 1433
+    idleTimeout: 600
+    encoding: "UTF-8"
+    encrypt: "yes"
+
+  prod_server:
+    driver: "ODBC Driver 17 for SQL Server"
+    database: "azdwappprod01sql30"
+    uid_env: "AZURE_PROD_USER"
+    pwd_env: "AZURE_PROD_PWD"
+    server: "azdwappprod01.synapse.net"
+    authentication: "ActiveDirectoryPassword"
+    port: 1433
+    idleTimeout: 600
+    encoding: "UTF-8"
+    encrypt: "yes"
+
+Example Usage
+
+# Extract data from the development server
+dev_data <- extract_workzone_table(
+  table_name = "example_table",
+  server_key = "dev_server",
+  config_file = "config/config.yaml"
+)
+
+# Extract data from the production server
+prod_data <- extract_workzone_table(
+  table_name = "example_table",
+  server_key = "prod_server",
+  config_file = "config/config.yaml"
+)
+
+Explanation for Juniors
+
+	1.	Flexibility:
+	•	The function can handle multiple servers by simply switching the server_key parameter.
+	•	All server-specific details are stored in the YAML file, keeping the function clean and reusable.
+	2.	Avoid Duplication:
+	•	Instead of maintaining separate functions for different servers, a single function handles both cases, improving maintainability.
+	3.	Scalability:
+	•	Adding new servers or making changes to existing ones requires only updating the YAML file, not the code.
+	4.	Security:
+	•	Sensitive credentials like uid and pwd are fetched from environment variables, ensuring they are not hardcoded.
+
+Let me know if you need further adjustments!
