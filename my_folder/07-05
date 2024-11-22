@@ -1,75 +1,14 @@
-If the only difference between the development and production environments is the database value, we can make the function simpler while still using the server_key approach for flexibility. Here’s the updated function and YAML configuration:
-
-Simplified Unified Function
-
-extract_workzone_table <- function(table_name, server_key = "dev", config_file = "config/config.yaml") {
-  # Load configuration
-  config <- yaml::read_yaml(config_file)
+initialize <- function(config_file, model_name) {
+  # Load the configuration file
+  self$config <- yaml::read_yaml(config_file)
   
-  # Retrieve the database based on the server key
-  database <- config$databases[[server_key]]
-  
-  if (is.null(database)) {
-    stop(glue::glue("Invalid server_key: {server_key}. Check the config file."))
+  # Check if the model name exists in the config
+  if (!model_name %in% names(self$config$modeling)) {
+    stop(glue::glue("Model '{model_name}' not found in the configuration file."))
   }
   
-  # Create the pool
-  pool <- pool::dbPool(
-    drv = odbc::odbc(),
-    driver = "ODBC Driver 17 for SQL Server",
-    database = database,
-    uid = Sys.getenv("AZURE_USER"),
-    pwd = Sys.getenv("AZURE_PWD"),
-    server = "azdwappprod01sql30.azuresynapse.net",
-    Authentication = "ActiveDirectoryPassword",
-    port = 1433,
-    idleTimeout = 600,
-    encoding = "UTF-8",
-    encrypt = "yes"
-  )
+  # Load model-specific settings
+  self$model <- self$config$modeling[[model_name]]
   
-  # Extract the dataset
-  db_data <- dbGetQuery(pool, glue::glue("SELECT * FROM WZ_CLAIMS.{table_name};")) %>%
-    clean_names(case = "snake")
-  
-  # Close the pool
-  pool::poolClose(pool)
-  
-  message(glue::glue("Data extracted from {server_key} environment for table {table_name}."))
-  return(db_data)
+  message(glue::glue("Model '{model_name}' initialized successfully."))
 }
-
-Simplified YAML Configuration
-
-databases:
-  dev: "azdwappprod01sql30_dev"
-  prod: "azdwappprod01sql30_prod"
-
-Example Usage
-
-# Extract data from the development environment
-dev_data <- extract_workzone_table(
-  table_name = "example_table",
-  server_key = "dev",
-  config_file = "config/config.yaml"
-)
-
-# Extract data from the production environment
-prod_data <- extract_workzone_table(
-  table_name = "example_table",
-  server_key = "prod",
-  config_file = "config/config.yaml"
-)
-
-Explanation
-
-	1.	Single Point of Change:
-	•	The database values are managed in the YAML file under the databases key. Adding new environments (e.g., test) is as simple as updating the YAML.
-	2.	Code Simplicity:
-	•	All other connection parameters are identical, so we only parameterize the database value. This keeps the function clean and concise.
-	3.	Flexible Environment Switching:
-	•	The server_key parameter allows you to switch between environments (dev, prod, etc.) without modifying the function itself.
-	4.	Environment Variables for Security:
-	•	User credentials (AZURE_USER, AZURE_PWD) are stored in environment variables, ensuring sensitive data is not exposed in the code or YAML.
-
-Let me know if you’d like any further customization!
