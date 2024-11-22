@@ -1,16 +1,96 @@
+Best Practices for Using YAML Config Files in Data Science Projects
 
-VM versus VS
- 
-1- What is VM, how it is different form VS?
-2- Options to use different machine types with different config depending on required computational power,
-3- The option of monthly billing
-4- Less maintenance than VS, preparing confluence pages is the key
-5- To use VS, we really need comprehensive testing, since it has 1 year contract. A very Short-term benchmark is not enough reliable for choosing a config
-6- VM is the way to go for now even if we want to switch to VS down the road
-7- VS provides options for multiple users at the same time, while VM is for one
-8- Risks and Considerations:
-9- There is no risk of using VM, in terms of missing ADA servers, since ADA will be available all the time
-10- The team should be cautious enough to shut down VM after usage
-11- The team should be cautious enough and use VM only when required
-12- The team should be cautious about choosing a VM that is compatible with their tasks, otherwise, if we use a very powerful machine for a simple task, we face with underperforming machine and a waste of money
- 
+Overview
+
+YAML configuration files play a crucial role in modern data science projects. They help separate code from configuration, making your code more modular, flexible, and reusable. Instead of hardcoding parameters, paths, or settings, YAML files centralize these details, simplifying updates and improving maintainability.
+
+This page explains how to effectively use YAML config files, with examples of applying them in our project.
+
+Benefits of YAML Config Files
+
+	1.	Modularity: Separate code logic from configuration details.
+	2.	Reusability: Share common configurations across multiple scripts or functions.
+	3.	Flexibility: Easily switch between environments (e.g., dev and prod) or use different parameter sets without modifying the code.
+	4.	Scalability: Manage complex configurations for large projects without cluttering the codebase.
+
+How to Use YAML Config Files
+
+	1.	Define Parameters in YAML File:
+	•	Create a config.yaml file with structured content.
+	•	Example:
+
+model_paths:
+  dev_model_path: "models/dev/"
+  prod_model_path: "models/prod/"
+database:
+  dev:
+    driver: "ODBC Driver 17 for SQL Server"
+    server: "dev.server.net"
+    database: "dev_db"
+    uid: "user_dev"
+    pwd: "pass_dev"
+  prod:
+    driver: "ODBC Driver 17 for SQL Server"
+    server: "prod.server.net"
+    database: "prod_db"
+    uid: "user_prod"
+    pwd: "pass_prod"
+
+
+	2.	Load the YAML File in Your R Script:
+	•	Use the yaml library to read the file:
+
+config <- yaml::read_yaml("config/config.yaml")
+
+
+	3.	Access Parameters Dynamically:
+	•	Pass the relevant configuration to functions for environment-specific operations.
+
+dev_model_path <- config$model_paths$dev_model_path
+prod_model_path <- config$model_paths$prod_model_path
+
+
+	4.	Flexible Functions:
+	•	Use functions that take configuration keys as arguments to dynamically handle different settings or paths:
+
+load_models <- function(mod_lookup, model_path_key, config_file = "config/config.yaml") {
+    config <- yaml::read_yaml(config_file)
+    model_path <- config$model_paths[[model_path_key]]
+    # Load models based on the specified path
+}
+
+Example from Our Project
+
+Here’s how YAML was used to improve code flexibility for model loading and database connections:
+	1.	YAML Configuration Example:
+
+model_paths:
+  dev_model_path: "data/api/bundle_to_api/v2_models/"
+  prod_model_path: "models/trained_models/selected_model/"
+
+
+	2.	Code Example for Model Loading:
+
+load_models <- function(mod_lookup, model_path_key, config_file = "config/config.yaml") {
+    config <- yaml::read_yaml(config_file)
+    model_path <- config$model_paths[[model_path_key]]
+    for (i in 1:nrow(mod_lookup)) {
+        file_name <- mod_lookup[i, ] %>% pull(file_name)
+        env_name <- mod_lookup[i, ] %>% pull(env_name)
+        assign(
+            env_name,
+            readRDS(here::here(model_path, file_name)),
+            envir = .GlobalEnv
+        )
+    }
+    message(glue::glue("Models loaded from {model_path}."))
+}
+
+Best Practices
+
+	•	Validation: Validate YAML values in the R script before using them to avoid errors.
+	•	Dynamic Access: Always access YAML keys dynamically to handle multiple environments flexibly.
+	•	Documentation: Clearly document YAML parameters and their usage in your code and project documentation.
+	•	Version Control: Include your config.yaml file in version control, but ensure sensitive information like credentials is excluded or managed securely (e.g., using environment variables).
+
+Feel free to ask questions or suggest improvements as you explore YAML configuration in your work!
