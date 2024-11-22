@@ -1,14 +1,16 @@
-initialize <- function(config_file, model_name) {
-  # Load the configuration file
-  self$config <- yaml::read_yaml(config_file)
-  
-  # Check if the model name exists in the config
-  if (!model_name %in% names(self$config$modeling)) {
-    stop(glue::glue("Model '{model_name}' not found in the configuration file."))
-  }
-  
-  # Load model-specific settings
-  self$model <- self$config$modeling[[model_name]]
-  
-  message(glue::glue("Model '{model_name}' initialized successfully."))
-}
+
+VM versus VS
+ 
+1- What is VM, how it is different form VS?
+2- Options to use different machine types with different config depending on required computational power,
+3- The option of monthly billing
+4- Less maintenance than VS, preparing confluence pages is the key
+5- To use VS, we really need comprehensive testing, since it has 1 year contract. A very Short-term benchmark is not enough reliable for choosing a config
+6- VM is the way to go for now even if we want to switch to VS down the road
+7- VS provides options for multiple users at the same time, while VM is for one
+8- Risks and Considerations:
+9- There is no risk of using VM, in terms of missing ADA servers, since ADA will be available all the time
+10- The team should be cautious enough to shut down VM after usage
+11- The team should be cautious enough and use VM only when required
+12- The team should be cautious about choosing a VM that is compatible with their tasks, otherwise, if we use a very powerful machine for a simple task, we face with underperforming machine and a waste of money
+ 
