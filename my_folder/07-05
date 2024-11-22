@@ -1,96 +1,133 @@
-Best Practices for Using YAML Config Files in Data Science Projects
+Object-Oriented Programming in R: A Practical Guide
 
-Overview
+This page is designed to help the team understand and leverage object-oriented programming (OOP) in R, focusing on R6 classes and their application in our data science projects. Below, we address some common questions and provide examples from our recent implementations.
 
-YAML configuration files play a crucial role in modern data science projects. They help separate code from configuration, making your code more modular, flexible, and reusable. Instead of hardcoding parameters, paths, or settings, YAML files centralize these details, simplifying updates and improving maintainability.
+1. Why is R not traditionally considered object-oriented?
 
-This page explains how to effectively use YAML config files, with examples of applying them in our project.
+R is primarily a functional programming language, where functions are the primary way of organizing and executing logic. While R supports object-oriented programming (OOP), it does not enforce it like languages such as Java or Python. Historically, R has focused more on functional paradigms, with object-oriented systems like S3 and S4 introduced later for additional flexibility.
 
-Benefits of YAML Config Files
+2. How can object-oriented programming help with efficiency, code maintenance, and scalability?
 
-	1.	Modularity: Separate code logic from configuration details.
-	2.	Reusability: Share common configurations across multiple scripts or functions.
-	3.	Flexibility: Easily switch between environments (e.g., dev and prod) or use different parameter sets without modifying the code.
-	4.	Scalability: Manage complex configurations for large projects without cluttering the codebase.
+	•	Efficiency: Reusable methods and modular code reduce redundancy.
+	•	Code Maintenance: Centralized logic within classes makes debugging and updates easier.
+	•	Scalability: Encapsulation of functionality ensures the system remains manageable as projects grow in complexity.
 
-How to Use YAML Config Files
+3. What are the drawbacks of not using object-oriented programming?
 
-	1.	Define Parameters in YAML File:
-	•	Create a config.yaml file with structured content.
-	•	Example:
+	•	Redundant Code: Without OOP, similar logic may need to be written multiple times across scripts.
+	•	Complexity: Large projects become harder to manage without structured organization.
+	•	Lack of Reusability: Functions and workflows are less portable and harder to adapt to new tasks.
 
-model_paths:
-  dev_model_path: "models/dev/"
-  prod_model_path: "models/prod/"
-database:
-  dev:
-    driver: "ODBC Driver 17 for SQL Server"
-    server: "dev.server.net"
-    database: "dev_db"
-    uid: "user_dev"
-    pwd: "pass_dev"
-  prod:
-    driver: "ODBC Driver 17 for SQL Server"
-    server: "prod.server.net"
-    database: "prod_db"
-    uid: "user_prod"
-    pwd: "pass_prod"
+4. What are the different types of object-oriented structures in R?
 
+	1.	S3: A simple, informal, and lightweight system; lacks strictness and formal definitions.
+	2.	S4: A formal system with rigorous definitions of classes and methods; ensures strict validation but is verbose.
+	3.	Reference Classes (RC): Introduced in R 2.12, allowing mutable objects but with limited flexibility.
+	4.	R6: A modern system designed for simplicity and power, supporting encapsulation, inheritance, and mutability.
 
-	2.	Load the YAML File in Your R Script:
-	•	Use the yaml library to read the file:
+5. Why is R6 preferred over other object-oriented systems in R?
 
-config <- yaml::read_yaml("config/config.yaml")
+	•	Simpler syntax compared to S4.
+	•	Supports encapsulation, where data and methods are stored together.
+	•	Allows inheritance, enabling reusable and extensible code.
+	•	Provides mutable objects, where data within the object can be modified without creating new copies.
+	•	Ideal for applications requiring efficient memory usage, like machine learning workflows.
 
+6. What are the key components of an R6 class?
 
-	3.	Access Parameters Dynamically:
-	•	Pass the relevant configuration to functions for environment-specific operations.
+	1.	Class Definition: Created using R6Class.
+	2.	Public Methods: Functions accessible from outside the class.
+	3.	Private Methods: Functions accessible only within the class.
+	4.	Fields: Variables to store data within the class.
+	5.	Initialize Method: Defines how the object is instantiated and initialized.
 
-dev_model_path <- config$model_paths$dev_model_path
-prod_model_path <- config$model_paths$prod_model_path
+7. How can we create and call a simple R6 class?
 
+Example: A Simple Calculator Class
 
-	4.	Flexible Functions:
-	•	Use functions that take configuration keys as arguments to dynamically handle different settings or paths:
+library(R6)
 
-load_models <- function(mod_lookup, model_path_key, config_file = "config/config.yaml") {
-    config <- yaml::read_yaml(config_file)
-    model_path <- config$model_paths[[model_path_key]]
-    # Load models based on the specified path
-}
+Calculator <- R6Class(
+  "Calculator",
+  public = list(
+    add = function(x, y) x + y,
+    subtract = function(x, y) x - y
+  )
+)
+
+# Instantiate and use the class
+calc <- Calculator$new()
+calc$add(5, 3)       # Output: 8
+calc$subtract(10, 4) # Output: 6
+
+8. How does inheritance work in R6?
+
+Inheritance allows an R6 class to inherit methods and fields from another class, promoting reusability.
+
+Example:
+
+AdvancedCalculator <- R6Class(
+  "AdvancedCalculator",
+  inherit = Calculator,
+  public = list(
+    multiply = function(x, y) x * y,
+    divide = function(x, y) {
+      if (y == 0) stop("Division by zero!")
+      x / y
+    }
+  )
+)
+
+# Use the inherited and new methods
+adv_calc <- AdvancedCalculator$new()
+adv_calc$add(2, 3)       # Inherited method: Output 5
+adv_calc$multiply(4, 5)  # New method: Output 20
+
+9. What are the common mistakes when using R6?
+
+	•	Not initializing fields properly: Ensure default values are set during initialization.
+	•	Ignoring encapsulation: Exposing too much internal logic via public methods.
+	•	Improper use of inheritance: Overcomplicating the design when inheritance is unnecessary.
+	•	Copying mutable objects: R6 objects are mutable, so copying them without care can lead to unexpected behavior.
 
 Example from Our Project
 
-Here’s how YAML was used to improve code flexibility for model loading and database connections:
-	1.	YAML Configuration Example:
+Below is a practical implementation of an R6 class in our repository for modeling:
 
-model_paths:
-  dev_model_path: "data/api/bundle_to_api/v2_models/"
-  prod_model_path: "models/trained_models/selected_model/"
+YAML Configuration for Flexibility:
 
+modeling:
+  title: "Modeling auto claims"
+  models:
+    model_name: "auto_model"
+  training:
+    num_threads: 12
 
-	2.	Code Example for Model Loading:
+R6 Class Example:
 
-load_models <- function(mod_lookup, model_path_key, config_file = "config/config.yaml") {
-    config <- yaml::read_yaml(config_file)
-    model_path <- config$model_paths[[model_path_key]]
-    for (i in 1:nrow(mod_lookup)) {
-        file_name <- mod_lookup[i, ] %>% pull(file_name)
-        env_name <- mod_lookup[i, ] %>% pull(env_name)
-        assign(
-            env_name,
-            readRDS(here::here(model_path, file_name)),
-            envir = .GlobalEnv
-        )
+ClaimsModelClass <- R6Class(
+  "ClaimsModelClass",
+  public = list(
+    config = NULL,
+    initialize = function(config_file) {
+      self$config <- yaml::read_yaml(config_file)
+      message("Configuration loaded.")
+    },
+    train_model = function(data, num_threads) {
+      # Use configuration and data to train the model
+      message(glue::glue("Training model '{self$config$modeling$models$model_name}'"))
     }
-    message(glue::glue("Models loaded from {model_path}."))
-}
+  )
+)
 
-Best Practices
+# Initialize and use the class
+claims_model <- ClaimsModelClass$new(config_file = "config/config.yaml")
+claims_model$train_model(data = training_data, num_threads = claims_model$config$training$num_threads)
 
-	•	Validation: Validate YAML values in the R script before using them to avoid errors.
-	•	Dynamic Access: Always access YAML keys dynamically to handle multiple environments flexibly.
-	•	Documentation: Clearly document YAML parameters and their usage in your code and project documentation.
-	•	Version Control: Include your config.yaml file in version control, but ensure sensitive information like credentials is excluded or managed securely (e.g., using environment variables).
+Advantages We Achieved with R6
 
-Feel free to ask questions or suggest improvements as you explore YAML configuration in your work!
+	1.	Modularity: Different functionalities are encapsulated within the class, making it easier to extend and debug.
+	2.	Flexibility: Configurable parameters are stored in the YAML file, eliminating hardcoding.
+	3.	Scalability: Our design now supports multiple models and training workflows.
+
+This structure ensures our team follows best practices while handling complex workflows with ease.
