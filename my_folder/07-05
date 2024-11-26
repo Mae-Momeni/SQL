@@ -1,104 +1,53 @@
-YAML: A Guide to Managing Configurations
+Here’s a refined Cost-Benefit Framework (BCFW) based on your focus on model development in 2025, with an emphasis on computing power:
 
-This page is designed to introduce YAML and demonstrate how it can enhance our coding practices, especially when working with complex projects. It explains why YAML is useful, when to use it, and how to integrate it into R workflows.
+Cost-Benefit Framework (BCFW) for Virtual Machines
 
-1. What is YAML?
+Goal
 
-	•	YAML (Yet Another Markup Language) is a human-readable data format commonly used for configuration files.
-	•	It uses indentation to represent data structures like lists and dictionaries, making it simple and clean.
-	•	YAML is language-agnostic, meaning it can be used across multiple programming languages, including R.
+To assess the costs and benefits of implementing virtual machines (VMs) to support our team’s intensive model development plans in 2025, which require high computational resources.
 
-Example YAML Structure:
+Benefits
 
-modeling:
-  title: "Modeling auto claims"
-  models:
-    model_name: "auto_model"
-  training:
-    num_threads: 12
-    cross_validation:
-      number_cv: 3
-      tune_grid:
-        nrounds: [100, 150]
-        max_depth: [5, 10]
+	1.	Scalability for 2025 Model Development:
+	•	Model development plans for 2025 include exploring advanced methodologies such as GAM (Generalized Additive Models) and testing new model packages like tidymodels.
+	•	These models are highly resource-intensive and computationally demanding, and without dedicated VMs, we face severe bottlenecks that will limit our ability to execute these plans.
+	2.	Improved Workflow Efficiency:
+	•	Current issues such as frequent RStudio crashes during large dataset processing and slow data loading (~1 minute per dataset) severely disrupt productivity.
+	•	VMs will provide the required stability and computing power to minimize downtime, improving turnaround times for model training and testing.
+	3.	Enhanced Model Accuracy and Experimentation:
+	•	Currently, resource limitations force us to rely on sampling, which compromises model accuracy.
+	•	With VMs, we can use entire datasets, enabling more comprehensive feature engineering, data imputations, and hyperparameter tuning for improved model quality.
+	4.	Future-Proofing for Larger Datasets:
+	•	As data volumes continue to grow, the ability to handle larger datasets is critical. VMs ensure that our team can scale up seamlessly, avoiding repeated bottlenecks in the future.
+	5.	Increased Productivity Across Teams:
+	•	Dedicated VMs will allow team members to run multiple models and processes concurrently, reducing wait times and ensuring efficient resource utilization.
+	•	This will directly enhance our ability to meet deadlines for ongoing and future projects.
 
-2. Why is it beneficial to separate configuration from code in coding practices?
+Costs
 
-	•	Flexibility: Separating configurations makes it easier to adapt code to different environments (e.g., dev, test, production).
-	•	Readability: Keeps code clean and concise by isolating parameters in a centralized file.
-	•	Collaboration: Non-programmers can modify configurations without needing to change the underlying code.
-	•	Avoids Hardcoding: Reduces repetitive updates when parameters change.
+VM Configuration and Payment
 
-3. When should we use YAML and when should we do hard-coding?
+	•	Selected VMs: 1 D8as_v4 + 1 F16s_v2 hybrid VM.
+	•	Cost Breakdown:
+	•	Monthly cost: $1,056 - $1,494 (flexible plan based on usage).
+	•	Annual cost (locked-in): $12,676 (with 40% discount).
+	•	Upload/download fees: ~$400 (estimated based on current usage).
+	•	Payments: On a monthly basis with the flexibility to scale up/down as needed.
 
-	•	Use YAML:
-	•	When configurations are likely to change frequently (e.g., file paths, thresholds, model hyperparameters).
-	•	When the project needs to support multiple environments.
-	•	When external collaborators or team members need access to modify parameters.
-	•	Use Hardcoding:
-	•	For static values that do not change (e.g., constants like PI = 3.14159).
-	•	For small scripts where introducing a configuration file adds unnecessary complexity.
+Workload Estimates
 
-4. How can using YAML improve code readability, maintainability, and reusability?
+	•	Initial setup: ~1 week for deployment and stabilization.
+	•	Adoption phase: 1 day/week for 3 weeks during initial usage.
+	•	Stabilized usage: ~1 hour/month per user for maintenance and monitoring.
+	•	Total annual workload (1 person): ~10 days/year.
 
-	•	Readability: YAML provides a clean and clear format for defining parameters, avoiding clutter in the main script.
-	•	Maintainability: Updates are centralized in the YAML file, so changes do not require modifying multiple parts of the code.
-	•	Reusability: Configuration files make it easy to share and replicate workflows across different projects.
+Conclusion
 
-5. What challenges or inefficiencies might arise if we do not use configuration files like YAML in our projects?
+The planned model development in 2025 is heavily dependent on high computational resources to:
+	1.	Support advanced modeling techniques (e.g., GAM, tidymodels).
+	2.	Handle larger datasets without frequent crashes or slowdowns.
+	3.	Improve experimentation capacity and model accuracy by eliminating sampling constraints.
 
-	•	Hardcoding Overload: Code becomes cluttered with hardcoded values, making it hard to identify and update parameters.
-	•	Error-Prone Updates: Changing parameters in multiple places increases the risk of inconsistency or errors.
-	•	Lack of Flexibility: Code cannot be easily adapted to different environments or scenarios.
+Investing in VMs ensures our team can achieve these goals efficiently while supporting growth and scalability. The estimated annual cost of $12,676 (locked-in) is a strategic investment in enhancing productivity, reducing bottlenecks, and ensuring timely delivery of high-quality models. This transition directly aligns with the organization’s commitment to leveraging data-driven insights for business success.
 
-6. How can YAML be integrated into an R workflow for managing configurations?
-
-	•	YAML files are created separately and stored in the project directory.
-	•	The yaml package in R is used to read and parse the configuration file.
-	•	Configuration parameters are accessed via list structures in R.
-
-7. A simple example of YAML configuration files: How can we load them in R?
-
-YAML File (config.yaml):
-
-modeling:
-  title: "Claims Analysis"
-  models:
-    model_name: "claims_model"
-  training:
-    num_threads: 8
-    hyperparameters:
-      max_depth: 10
-      eta: 0.05
-
-R Code to Load YAML:
-
-library(yaml)
-
-# Load YAML file
-config <- yaml::read_yaml("config/config.yaml")
-
-# Access configuration parameters
-model_name <- config$modeling$models$model_name
-num_threads <- config$training$num_threads
-max_depth <- config$training$hyperparameters$max_depth
-
-# Print loaded values
-print(glue::glue("Model: {model_name}, Threads: {num_threads}, Max Depth: {max_depth}"))
-
-Practical Advantages in Our Workflows
-
-	1.	Centralized Configurations: All model parameters, paths, and environment settings are stored in YAML, reducing code complexity.
-	2.	Ease of Switching Environments: Simply update paths and parameters in the YAML file to switch between development and production.
-	3.	Reusability: Scripts can dynamically adapt to different configurations without needing manual edits.
-
-Example in Practice:
-
-# Load configurations for model training
-config <- yaml::read_yaml("config/config.yaml")
-
-# Pass configurations to an R6 class
-claims_model <- ClaimsModelClass$new(config_file = "config/config.yaml")
-claims_model$train_model()
-
-By using YAML, we have streamlined our coding practices, making them more modular, flexible, and easier to maintain. This approach will help the team collaborate more effectively and adapt to changes quickly.
+This revised version emphasizes the critical need for VMs to meet your 2025 goals while addressing the current pain points with accuracy and clarity. Let me know if there’s any other aspect you’d like to emphasize!
