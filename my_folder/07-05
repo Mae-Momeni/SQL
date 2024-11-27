@@ -1,53 +1,43 @@
-Here’s a refined Cost-Benefit Framework (BCFW) based on your focus on model development in 2025, with an emphasis on computing power:
+Here’s the expanded version with more details, keeping it structured and clear:
 
-Cost-Benefit Framework (BCFW) for Virtual Machines
+Data Splitting Best Practice
 
-Goal
+	1.	Separate Data into Train and Test Sets First:
+	•	Train Set (70-90%):
+	•	Used for all aspects of model development, including:
+	•	Data preparation (e.g., cleaning, imputation, scaling).
+	•	Feature engineering and selection.
+	•	Trying different algorithms (e.g., XGBoost vs. GAM).
+	•	Hyperparameter tuning.
+	•	Cross-validation is applied within this set to ensure robust evaluation during development.
+	•	Test Set (10-30%):
+	•	Held out entirely during development.
+	•	Used only at the end for final model evaluation to provide an unbiased estimate of performance on unseen data.
 
-To assess the costs and benefits of implementing virtual machines (VMs) to support our team’s intensive model development plans in 2025, which require high computational resources.
+	2.	Develop Exclusively on the Training Data:
+	•	Perform all development activities within the training set or its cross-validation folds:
+	•	Data Preparation: Fit imputation values, scalers, or encoders on the training set only. Apply these transformations to the validation and test sets without refitting.
+	•	Feature Engineering and Selection: Test new features and selection strategies during cross-validation to avoid overfitting.
+	•	Algorithm Comparison: Compare model algorithms (e.g., XGBoost vs. GAM) within cross-validation to choose the best-performing one.
+	•	Business Metric Selection: Experiment with business metrics (e.g., RMSE, AUC, recall) using cross-validation.
+	•	Validation Set (Optional):
+	•	If needed, split part of the training set into a validation set to test the overall pipeline during development.
+	•	Do not use the test set at this stage to preserve its integrity.
 
-Benefits
+	3.	Use Cross-Validation for Tuning:
+	•	During training, use k-fold cross-validation (e.g., 5-fold or 10-fold):
+	•	Evaluate hyperparameters (e.g., learning_rate, max_depth).
+	•	Test the impact of different preprocessing techniques, features, and algorithms.
+	•	Average the metrics across folds for robust performance estimation.
 
-	1.	Scalability for 2025 Model Development:
-	•	Model development plans for 2025 include exploring advanced methodologies such as GAM (Generalized Additive Models) and testing new model packages like tidymodels.
-	•	These models are highly resource-intensive and computationally demanding, and without dedicated VMs, we face severe bottlenecks that will limit our ability to execute these plans.
-	2.	Improved Workflow Efficiency:
-	•	Current issues such as frequent RStudio crashes during large dataset processing and slow data loading (~1 minute per dataset) severely disrupt productivity.
-	•	VMs will provide the required stability and computing power to minimize downtime, improving turnaround times for model training and testing.
-	3.	Enhanced Model Accuracy and Experimentation:
-	•	Currently, resource limitations force us to rely on sampling, which compromises model accuracy.
-	•	With VMs, we can use entire datasets, enabling more comprehensive feature engineering, data imputations, and hyperparameter tuning for improved model quality.
-	4.	Future-Proofing for Larger Datasets:
-	•	As data volumes continue to grow, the ability to handle larger datasets is critical. VMs ensure that our team can scale up seamlessly, avoiding repeated bottlenecks in the future.
-	5.	Increased Productivity Across Teams:
-	•	Dedicated VMs will allow team members to run multiple models and processes concurrently, reducing wait times and ensuring efficient resource utilization.
-	•	This will directly enhance our ability to meet deadlines for ongoing and future projects.
+	4.	Evaluate Only Once on the Test Set:
+	•	After finalizing the model, train it on the entire training set (including validation, if used) using the best features, algorithm, and hyperparameters.
+	•	Use the test set for final evaluation to provide a realistic estimate of model performance on unseen data.
 
-Costs
+Why This Approach is Important
 
-VM Configuration and Payment
+	•	Preserves Test Set Integrity: Ensures the test set provides an unbiased performance estimate by keeping it untouched during development.
+	•	Prevents Overfitting: Cross-validation prevents reliance on a single train/validation split, especially for small datasets.
+	•	Supports Generalization: By isolating the test set, the model is better prepared to handle unseen, real-world data.
 
-	•	Selected VMs: 1 D8as_v4 + 1 F16s_v2 hybrid VM.
-	•	Cost Breakdown:
-	•	Monthly cost: $1,056 - $1,494 (flexible plan based on usage).
-	•	Annual cost (locked-in): $12,676 (with 40% discount).
-	•	Upload/download fees: ~$400 (estimated based on current usage).
-	•	Payments: On a monthly basis with the flexibility to scale up/down as needed.
-
-Workload Estimates
-
-	•	Initial setup: ~1 week for deployment and stabilization.
-	•	Adoption phase: 1 day/week for 3 weeks during initial usage.
-	•	Stabilized usage: ~1 hour/month per user for maintenance and monitoring.
-	•	Total annual workload (1 person): ~10 days/year.
-
-Conclusion
-
-The planned model development in 2025 is heavily dependent on high computational resources to:
-	1.	Support advanced modeling techniques (e.g., GAM, tidymodels).
-	2.	Handle larger datasets without frequent crashes or slowdowns.
-	3.	Improve experimentation capacity and model accuracy by eliminating sampling constraints.
-
-Investing in VMs ensures our team can achieve these goals efficiently while supporting growth and scalability. The estimated annual cost of $12,676 (locked-in) is a strategic investment in enhancing productivity, reducing bottlenecks, and ensuring timely delivery of high-quality models. This transition directly aligns with the organization’s commitment to leveraging data-driven insights for business success.
-
-This revised version emphasizes the critical need for VMs to meet your 2025 goals while addressing the current pain points with accuracy and clarity. Let me know if there’s any other aspect you’d like to emphasize!
+Does this version provide enough clarity, or should I refine specific sections further?
