@@ -1,1 +1,65 @@
-hh
+Data Splitting Strategy 1: Splitting dataset into train, validation, and test datasets
+
+Below you can see four different training strategies:
+
+Train Strategy A:
+
+General Methodology: Using hold-out validation, this approach is an alternative to cross-validation. The model is trained only on the training dataset, and validation is performed on a static validation dataset.
+
+Tools to Validate the Model During Training: Validation is performed by checking the business score of the model on the validation dataset during training. Once training is completed, the model's performance is tested on the test dataset.
+
+Main Drawback: This approach uses only one static validation dataset during training, which can lead to overfitting to the validation dataset and reduces model generalizability. Cross-validation is not utilized which will limit the ability to assess the model's robustness.
+
+Train Strategy B:
+
+General Methodology: Using cross-validation on the training dataset while slightly utilizing the validation dataset by not systematically checking its score during training.
+
+Tools to Validate the Model During Training: Validation is based on the cross-validation score.
+
+Main Drawback: This approach underutilizes the validation dataset. However, if we add this dataset to the training data and then only apply cross-validation, we can fully benefit from this dataset during training and cross-validation for hyperparameter tuning. This will provide more data for training and improve model generalizability.
+
+Train Strategy C:
+
+General Methodology: Using cross-validation on the training dataset while systematically using the validation dataset during training to validate the model. Once training is completed, the model's performance is tested on the test dataset.
+
+Tools to Validate the Model During Training: The model is validated using the business score on the validation dataset.
+
+Main Drawback: The aggregated business score from cross-validation is more reliable than a single static validation dataset. Relying on a static validation dataset may lead to bias toward that dataset and reduce model generalizability, negatively impacting the benefits of cross-validation.
+
+Train Strategy D:
+
+General Methodology: Using cross-validation on the training dataset while systematically using the validation dataset during training to validate the model.
+
+Tools to Validate the Model During Training: A mix of cross-validation scores and validation scores from the validation dataset is used.
+
+Main Drawback: Aggregated metrics from cross-validation are more reliable than a static validation dataset. Mixing cross-validation and static validation scores can reduce the impact of cross-validation and introduce complexity or inconsistency in the validation process.
+
+This approach requires careful balance, and improper implementation can reduce the benefits of cross-validation. Instead, it is recommended to only focus on cross-validation which provides a robust validation score, reducing bias and maintaining generalizability.
+
+Data Splitting Strategy 2: Splitting dataset into train and test datasets
+
+This is a best practice, and below you can find more details:
+
+Separate Data into Train and Test Sets First: (for example, 80%-20%)
+
+Use the training dataset for all aspects, from data preparation to modeling, while keeping the test dataset fully unseen.
+
+For example, if we plan to use a scaler on numerical features, the scaler should first be fitted on the train dataset and then applied to the test dataset to keep it unseen.
+
+Similarly, if we need to apply an encoder on categorical variables, the encoder should be fitted only on the train data and applied to the test dataset.
+
+Different models, such as XGBoost or GAM, can be applied only using the train data without touching the test dataset.
+
+Best Approach for Validation During Training:
+
+Use cross-validation (e.g., 5-fold) as it provides model generalizability and robustness during model development.
+
+During training, cross-validation allows for evaluating hyperparameters, testing the impact of different preprocessing techniques, original features, engineered features, and algorithms, etc.
+
+By the end of cross-validation, calculate the aggregated business score across different folds for robust performance estimation.
+
+Final Model Evaluation:
+
+Only at the end, for the final model evaluation, run the model on the test dataset to provide an unbiased estimate of performance on unseen data.
+
+If we gain insights from the test dataset during training, it compromises the capability of the unseen data and is not considered best practice.
