@@ -12,3 +12,11 @@ valid_set_summary <- valid_set_predictions %>%
   summarise(valid_set_size = n())
 
 print(valid_set_summary)
+
+
+library(dplyr)
+
+# Extract only validation rows for each fold
+valid_set_predictions <- mod_prob_auto_indemnity$pred %>%
+  filter(Resample == paste0("Resample", ceiling(rowIndex / 200))) %>%
+        print
