@@ -1,19 +1,17 @@
-library(dplyr)
+# Custom cross-validation indices (example if pre-defined)
+cv_indices <- indexes  # Ensure `indexes` contains the indices for training rows per fold
 
-# Extract only the OOF predictions for validation rows
+# Extract validation rows for each fold
 oof_valid_predictions <- mod_prob_auto_indemnity$pred %>%
-  group_by(Resample) %>%
-  filter(rowIndex %in% rowIndex[Resample == unique(Resample)]) %>%
-  distinct(rowIndex, .keep_all = TRUE) %>%
-  ungroup()
+  rowwise() %>%
+  filter(!rowIndex %in% cv_indices[[Resample]]) %>%  # Exclude training rows
+  ungroup() %>%
+  distinct(rowIndex, .keep_all = TRUE)  # Remove duplicates
 
-# Verify the size of the validation set for each fold
+# Verify validation set sizes per fold
 valid_set_summary <- oof_valid_predictions %>%
   group_by(Resample) %>%
-  summarise(valid_set_size = n_distinct(rowIndex))
+  summarise(valid_set_size = n())
 
 # Print validation set summary
 print(valid_set_summary)
-
-# Print OOF predictions
-print(oof_valid_predictions)
