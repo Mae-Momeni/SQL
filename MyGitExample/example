@@ -1,22 +1,21 @@
 library(dplyr)
 
-# Extract only validation set predictions for each fold
+# Parameters
+data_train_size <- nrow(data_train)  # Total size of the training set
+cv_number <- 5                      # Number of folds in cross-validation
+valid_set_size <- data_train_size / cv_number  # Size of the validation set per fold
+
+# Extract only validation rows for each fold
 valid_set_predictions <- mod_prob_auto_indemnity$pred %>%
   group_by(Resample) %>%
-  filter(rowIndex %in% rowIndex[Resample == unique(Resample)]) %>% 
+  filter(rowIndex %in% ((as.numeric(gsub("Resample", "", Resample)) - 1) * valid_set_size + 1):
+                     (as.numeric(gsub("Resample", "", Resample)) * valid_set_size)) %>%
   ungroup()
 
-# Verify the size of the validation set for each fold
+# Verify validation set sizes
 valid_set_summary <- valid_set_predictions %>%
   group_by(Resample) %>%
   summarise(valid_set_size = n())
 
+# Display validation set sizes
 print(valid_set_summary)
-
-
-library(dplyr)
-
-# Extract only validation rows for each fold
-valid_set_predictions <- mod_prob_auto_indemnity$pred %>%
-  filter(Resample == paste0("Resample", ceiling(rowIndex / 200))) %>%
-        print
