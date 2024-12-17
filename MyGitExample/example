@@ -1,15 +1,26 @@
-# Extract OOF predictions corresponding to validation rows for each fold
+# Assume 'indexes' already exists and contains training row indices
+# Extract validation rows for each fold
+valid_rows <- list()
+
+for (i in 1:number_cv) {
+  valid_rows[[i]] <- data_train %>%
+    filter(!(rownum %in% indexes[[i]])) %>%   # Exclude training rows
+    pull(rownum)                             # Return row numbers for validation
+}
+
+# View the validation rows for Resample 1
+print(valid_rows[[1]])
+
+
 oof_valid_predictions <- mod_prob_auto_indemnity$pred %>%
   rowwise() %>%
-  filter(!rowIndex %in% indexes[[as.numeric(gsub("Resample", "", Resample))]]) %>%
+  filter(rowIndex %in% valid_rows[[as.numeric(gsub("Resample", "", Resample))]]) %>%
   ungroup() %>%
-  distinct(rowIndex, Resample, .keep_all = TRUE)  # Deduplicate rows for valid set
+  distinct(rowIndex, Resample, .keep_all = TRUE)
 
-# Verify validation set sizes
+# Verify Validation Set Sizes
 valid_set_summary <- oof_valid_predictions %>%
   group_by(Resample) %>%
   summarise(valid_set_size = n())
 
-# Print results
-print(valid_set_summary)       # Validation set sizes per Resample
-print(oof_valid_predictions)   # Final filtered validation rows
+print(valid_set_summary)
