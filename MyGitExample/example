@@ -1,15 +1,9 @@
 library(dplyr)
 
-# Parameters
-data_train_size <- nrow(data_train)  # Total size of the training set
-cv_number <- 5                      # Number of folds in cross-validation
-valid_set_size <- data_train_size / cv_number  # Size of the validation set per fold
-
-# Extract only validation rows for each fold
+# Extract validation rows: Keep only rows where their Resample column matches the fold
 valid_set_predictions <- mod_prob_auto_indemnity$pred %>%
-  group_by(Resample) %>%
-  filter(rowIndex %in% ((as.numeric(gsub("Resample", "", Resample)) - 1) * valid_set_size + 1):
-                     (as.numeric(gsub("Resample", "", Resample)) * valid_set_size)) %>%
+  filter(Resample == paste0("Resample", ceiling(rowIndex / (nrow(data_train) / cv_number)))) %>%
+  distinct(rowIndex, .keep_all = TRUE) %>%  # Deduplicate for safety
   ungroup()
 
 # Verify validation set sizes
