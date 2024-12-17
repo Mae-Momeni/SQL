@@ -1,21 +1,18 @@
 library(dplyr)
 library(purrr)
 
-# Assume `indexes` contains training indices per fold, e.g., indexes$Resample1
-cv_indices <- indexes  # Training indices list for each fold
-
-# Step 1: Extract validation rows for each Resample
+# Extract validation rows for each Resample
 oof_valid_predictions <- mod_prob_auto_indemnity$pred %>%
-  group_by(Resample) %>%
-  filter(!(rowIndex %in% cv_indices[[unique(Resample)]])) %>%  # Exclude training rows
+  rowwise() %>%
+  filter(!rowIndex %in% indexes[[Resample]]) %>%  # Exclude training indices
   ungroup() %>%
-  distinct(rowIndex, Resample, .keep_all = TRUE)  # Remove duplicates
+  distinct(rowIndex, Resample, .keep_all = TRUE)  # Deduplicate rows
 
-# Step 2: Verify validation set sizes per fold
+# Verify validation set sizes per fold
 valid_set_summary <- oof_valid_predictions %>%
   group_by(Resample) %>%
   summarise(valid_set_size = n())
 
-# Print outputs
-print(valid_set_summary)  # Validation set size per fold
-print(oof_valid_predictions)  # Final validation predictions
+# Print results
+print(valid_set_summary)        # Validation set sizes per Resample
+print(oof_valid_predictions)    # Final filtered validation rows
