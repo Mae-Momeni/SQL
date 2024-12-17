@@ -1,12 +1,11 @@
 library(dplyr)
-library(purrr)
 
 # Extract validation rows for each Resample
 oof_valid_predictions <- mod_prob_auto_indemnity$pred %>%
   rowwise() %>%
-  filter(!rowIndex %in% indexes[[Resample]]) %>%  # Exclude training indices
+  filter(!(rowIndex %in% unlist(indexes[[Resample]]))) %>%  # Exclude training indices
   ungroup() %>%
-  distinct(rowIndex, Resample, .keep_all = TRUE)  # Deduplicate rows
+  distinct(rowIndex, Resample, .keep_all = TRUE)            # Deduplicate rows
 
 # Verify validation set sizes per fold
 valid_set_summary <- oof_valid_predictions %>%
@@ -14,5 +13,5 @@ valid_set_summary <- oof_valid_predictions %>%
   summarise(valid_set_size = n())
 
 # Print results
-print(valid_set_summary)        # Validation set sizes per Resample
-print(oof_valid_predictions)    # Final filtered validation rows
+print(valid_set_summary)       # Validation set sizes
+print(oof_valid_predictions)   # Final filtered validation rows
