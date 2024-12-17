@@ -1,1 +1,14 @@
-gf
+library(dplyr)
+
+# Extract only validation set predictions for each fold
+valid_set_predictions <- mod_prob_auto_indemnity$pred %>%
+  group_by(Resample) %>%
+  filter(rowIndex %in% rowIndex[Resample == unique(Resample)]) %>% 
+  ungroup()
+
+# Verify the size of the validation set for each fold
+valid_set_summary <- valid_set_predictions %>%
+  group_by(Resample) %>%
+  summarise(valid_set_size = n())
+
+print(valid_set_summary)
