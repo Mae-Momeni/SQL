@@ -1,15 +1,16 @@
 library(dplyr)
 
-# Extract validation rows: Keep only rows where their Resample column matches the fold
-valid_set_predictions <- mod_prob_auto_indemnity$pred %>%
-  filter(Resample == paste0("Resample", ceiling(rowIndex / (nrow(data_train) / cv_number)))) %>%
-  distinct(rowIndex, .keep_all = TRUE) %>%  # Deduplicate for safety
+# Extract OOF predictions for each fold
+oof_valid_predictions <- mod_prob_auto_indemnity$pred %>%
+  group_by(Resample) %>%                        # Group by fold (Resample)
+  filter(!rowIndex %in% rowIndex[Resample != unique(Resample)]) %>% # Keep only validation rows
   ungroup()
 
-# Verify validation set sizes
-valid_set_summary <- valid_set_predictions %>%
+# Verify results: Count validation rows per fold
+oof_valid_summary <- oof_valid_predictions %>%
   group_by(Resample) %>%
-  summarise(valid_set_size = n())
+  summarise(valid_set_size = n_distinct(rowIndex))
 
-# Display validation set sizes
-print(valid_set_summary)
+# Display OOF predictions and summary
+print(oof_valid_predictions)
+print(oof_valid_summary)
