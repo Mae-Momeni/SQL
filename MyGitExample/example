@@ -24,3 +24,20 @@ valid_set_summary <- oof_valid_predictions %>%
   summarise(valid_set_size = n())
 
 print(valid_set_summary)
+
+
+
+valid_rows <- list()
+
+# Loop over number of folds (number_cv)
+for (i in 1:number_cv) {
+  print(paste("Processing Resample", i))  # Debugging output
+
+  # Extract validation rows
+  valid_rows[[i]] <- data_train %>%
+    filter(rownum %in% indexes[[i]]) %>%
+    distinct(rownum, .keep_all = TRUE)  # Remove duplicates
+
+  # Print row count for debugging
+  print(nrow(valid_rows[[i]]))
+}
