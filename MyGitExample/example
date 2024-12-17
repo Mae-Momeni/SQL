@@ -1,19 +1,21 @@
 library(dplyr)
+library(purrr)
 
-# Define validation percentage (e.g., 25%)
-validation_percentage <- 0.25
+# Assume `indexes` contains training indices per fold, e.g., indexes$Resample1
+cv_indices <- indexes  # Training indices list for each fold
 
-# Dynamically extract validation rows
+# Step 1: Extract validation rows for each Resample
 oof_valid_predictions <- mod_prob_auto_indemnity$pred %>%
   group_by(Resample) %>%
-  slice(1:floor(n() * validation_percentage)) %>%  # Take first 25% of rows dynamically
-  ungroup()
+  filter(!(rowIndex %in% cv_indices[[unique(Resample)]])) %>%  # Exclude training rows
+  ungroup() %>%
+  distinct(rowIndex, Resample, .keep_all = TRUE)  # Remove duplicates
 
-# Verify the size of the validation set for each Resample
+# Step 2: Verify validation set sizes per fold
 valid_set_summary <- oof_valid_predictions %>%
   group_by(Resample) %>%
   summarise(valid_set_size = n())
 
-# Print validation set sizes and the validation predictions
-print(valid_set_summary)
-print(oof_valid_predictions)
+# Print outputs
+print(valid_set_summary)  # Validation set size per fold
+print(oof_valid_predictions)  # Final validation predictions
