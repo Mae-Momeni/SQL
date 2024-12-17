@@ -1,43 +1,21 @@
-# Assume 'indexes' already exists and contains training row indices
-# Extract validation rows for each fold
-valid_rows <- list()
+# Initialize an empty list to store valid set predictions
+oof_valid_predictions <- list()
 
+# Loop through each fold (resample)
 for (i in 1:number_cv) {
-  valid_rows[[i]] <- data_train %>%
-    filter(!(rownum %in% indexes[[i]])) %>%   # Exclude training rows
-    pull(rownum)                             # Return row numbers for validation
+  # Get row indices for the current fold's validation set
+  valid_indices <- valid_rows[[i]]
+  
+  # Filter predictions for the current Resample and matching row indices
+  fold_valid_preds <- mod_prob_auto_indemnity$pred %>%
+    filter(Resample == paste0("Resample", i) & rowIndex %in% valid_indices)
+  
+  # Store in the list
+  oof_valid_predictions[[i]] <- fold_valid_preds
 }
 
-# View the validation rows for Resample 1
-print(valid_rows[[1]])
+# Combine all valid set predictions into one data frame
+oof_valid_predictions_final <- bind_rows(oof_valid_predictions)
 
-
-oof_valid_predictions <- mod_prob_auto_indemnity$pred %>%
-  rowwise() %>%
-  filter(rowIndex %in% valid_rows[[as.numeric(gsub("Resample", "", Resample))]]) %>%
-  ungroup() %>%
-  distinct(rowIndex, Resample, .keep_all = TRUE)
-
-# Verify Validation Set Sizes
-valid_set_summary <- oof_valid_predictions %>%
-  group_by(Resample) %>%
-  summarise(valid_set_size = n())
-
-print(valid_set_summary)
-
-
-
-valid_rows <- list()
-
-# Loop over number of folds (number_cv)
-for (i in 1:number_cv) {
-  print(paste("Processing Resample", i))  # Debugging output
-
-  # Extract validation rows
-  valid_rows[[i]] <- data_train %>%
-    filter(rownum %in% indexes[[i]]) %>%
-    distinct(rownum, .keep_all = TRUE)  # Remove duplicates
-
-  # Print row count for debugging
-  print(nrow(valid_rows[[i]]))
-}
+# View the OOF validation predictions
+print(oof_valid_predictions_final)
