@@ -1,25 +1,24 @@
-# Step 1: Align rowIndex in predictions with rownum in data_train
-mod_prob_auto_indemnity$pred <- mod_prob_auto_indemnity$pred %>%
-  mutate(rowIndex = as.integer(rowIndex))  # Ensure rowIndex is numeric
-
-# Step 2: Loop through folds and filter OOF predictions
+# Initialize list to store valid predictions
 oof_valid_predictions <- list()
 
 for (i in 1:number_cv) {
   print(paste("Processing Resample", i))
-  
-  # Get validation indices from the current fold
+
+  # Get the validation row indices for fold i
   valid_indices <- valid_rows[[i]]
-  
-  # Filter predictions for the current fold
+
+  # Filter OOF predictions for fold i
   fold_valid_preds <- mod_prob_auto_indemnity$pred %>%
     filter(Resample == paste0("Resample", i) & rowIndex %in% valid_indices)
-  
+
   print(paste("Number of Predictions Filtered in Resample", i, ":", nrow(fold_valid_preds)))
-  
+
   # Store filtered results
   oof_valid_predictions[[i]] <- fold_valid_preds
 }
 
-# Combine OOF predictions
+# Combine all valid predictions into a single table
 oof_valid_predictions_combined <- bind_rows(oof_valid_predictions)
+
+# View final OOF predictions
+print(oof_valid_predictions_combined)
