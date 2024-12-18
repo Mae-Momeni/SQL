@@ -1,10 +1,10 @@
-# Join data_train with predictions on rownum and rowIndex
-alignment_check <- data_train %>%
-  select(rownum) %>%
-  inner_join(mod_prob_auto_indemnity$pred, by = c("rownum" = "rowIndex"))
+# Debugging Row Indices
+print("First few row indices in valid set:")
+print(head(valid_indices))  
 
-# Check the number of matched rows
-print(nrow(alignment_check))
+print("First few row indices in predictions:")
+print(head(mod_prob_auto_indemnity$pred$rowIndex))
 
-# Compare to total rows in data_train
-print(nrow(data_train))
+# Check overlap
+print("Common row indices between valid_indices and rowIndex:")
+print(intersect(valid_indices, mod_prob_auto_indemnity$pred$rowIndex))
