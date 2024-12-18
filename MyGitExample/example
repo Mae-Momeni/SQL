@@ -1,6 +1,9 @@
-mod_prob_auto_indemnity$pred <- mod_prob_auto_indemnity$pred %>%
-  left_join(data_train %>% select(rownum), by = c("rowIndex" = "rownum"))
+print("First few rownum values in data_train:")
+print(head(data_train$rownum))
 
-# Filter predictions for valid indices
-fold_valid_preds <- mod_prob_auto_indemnity$pred %>%
-  filter(Resample == paste0("Resample", i) & rowIndex %in% valid_indices)
+print("First few rowIndex values in predictions:")
+print(head(mod_prob_auto_indemnity$pred$rowIndex))
+
+# Check for any overlap
+print("Intersection of rownum and rowIndex:")
+print(intersect(data_train$rownum, mod_prob_auto_indemnity$pred$rowIndex))
