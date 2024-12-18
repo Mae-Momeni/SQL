@@ -1,10 +1,6 @@
-# Debugging Row Indices
-print("First few row indices in valid set:")
-print(head(valid_indices))  
+mod_prob_auto_indemnity$pred <- mod_prob_auto_indemnity$pred %>%
+  left_join(data_train %>% select(rownum), by = c("rowIndex" = "rownum"))
 
-print("First few row indices in predictions:")
-print(head(mod_prob_auto_indemnity$pred$rowIndex))
-
-# Check overlap
-print("Common row indices between valid_indices and rowIndex:")
-print(intersect(valid_indices, mod_prob_auto_indemnity$pred$rowIndex))
+# Filter predictions for valid indices
+fold_valid_preds <- mod_prob_auto_indemnity$pred %>%
+  filter(Resample == paste0("Resample", i) & rowIndex %in% valid_indices)
