@@ -1,26 +1,27 @@
 create_index <- function(data_train, number_cv, variable_group) {
-  set.seed(123) # Set the seed for reproducibility
-
-  # Step 1: Add row numbers first
+  set.seed(123) # Set seed for reproducibility
+  
+  # Step 1: Add row numbers
   data_train <- data_train %>%
     mutate(rownum = row_number())
-
-  # Step 2: Generate indices for groups
+  
+  # Step 2: Generate group indices and ensure types are consistent
   claims_indexes <- data_train %>%
-    group_by(get(variable_group)) %>%
-    summarise(index = sample(1:number_cv, 1, replace = TRUE), .groups = "drop")
-
-  # Step 3: Left join indices back to the data
+    group_by(across(all_of(variable_group))) %>% 
+    summarise(index = sample(1:number_cv, 1, replace = TRUE), .groups = "drop") %>%
+    mutate(!!variable_group := as.character(!!sym(variable_group))) # Ensure CLAIMNUMBER is character
+  
+  # Step 3: Join back with consistent types
   data_train <- data_train %>%
-    left_join(claims_indexes, by = set_names("index", variable_group))
-
-  # Step 4: Create the list of row indices for each fold
+    left_join(claims_indexes, by = variable_group)
+  
+  # Step 4: Create list of row indices for each fold
   indexes <- list()
   for (i in 1:number_cv) {
     indexes[[i]] <- data_train %>%
       filter(index == i) %>%
-      pull(rownum) # Extract row numbers
+      pull(rownum)
   }
-
+  
   return(indexes)
 }
