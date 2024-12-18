@@ -1,34 +1,25 @@
-# Initialize a list to store OOF predictions for each fold
+# Step 1: Align rowIndex in predictions with rownum in data_train
+mod_prob_auto_indemnity$pred <- mod_prob_auto_indemnity$pred %>%
+  mutate(rowIndex = as.integer(rowIndex))  # Ensure rowIndex is numeric
+
+# Step 2: Loop through folds and filter OOF predictions
 oof_valid_predictions <- list()
 
-# Loop through each fold (resample) to extract predictions
 for (i in 1:number_cv) {
-  print(paste("Processing OOF Predictions for Resample", i))
+  print(paste("Processing Resample", i))
   
-  # Retrieve the row indices for the validation set of the current fold
-  valid_indices <- valid_rows[[i]]$rownum
+  # Get validation indices from the current fold
+  valid_indices <- valid_rows[[i]]
   
-  print(paste("Number of Validation Rows in Resample", i, ":", length(valid_indices))) # Debugging Output
-  
-  # Filter predictions: Keep rows matching the current Resample and validation indices
+  # Filter predictions for the current fold
   fold_valid_preds <- mod_prob_auto_indemnity$pred %>%
     filter(Resample == paste0("Resample", i) & rowIndex %in% valid_indices)
   
-  print(paste("Number of Predictions Filtered in Resample", i, ":", nrow(fold_valid_preds))) # Debugging Output
+  print(paste("Number of Predictions Filtered in Resample", i, ":", nrow(fold_valid_preds)))
   
-  # Store the results in the list
+  # Store filtered results
   oof_valid_predictions[[i]] <- fold_valid_preds
 }
 
-# Combine all OOF predictions into a single data frame
-oof_valid_predictions_final <- bind_rows(oof_valid_predictions)
-
-# Verify the combined results
-print("Final Combined OOF Predictions:")
-print(oof_valid_predictions_final)
-
-# Check group sizes to validate row counts per fold
-valid_set_summary <- oof_valid_predictions_final %>%
-  group_by(Resample) %>%
-  summarise(valid_set_size = n())
-print(valid_set_summary)
+# Combine OOF predictions
+oof_valid_predictions_combined <- bind_rows(oof_valid_predictions)
