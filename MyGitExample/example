@@ -1,9 +1,26 @@
-print("First few rownum values in data_train:")
-print(head(data_train$rownum))
+create_index <- function(data_train, number_cv, variable_group) {
+  set.seed(123) # Set the seed for reproducibility
 
-print("First few rowIndex values in predictions:")
-print(head(mod_prob_auto_indemnity$pred$rowIndex))
+  # Step 1: Add row numbers first
+  data_train <- data_train %>%
+    mutate(rownum = row_number())
 
-# Check for any overlap
-print("Intersection of rownum and rowIndex:")
-print(intersect(data_train$rownum, mod_prob_auto_indemnity$pred$rowIndex))
+  # Step 2: Generate indices for groups
+  claims_indexes <- data_train %>%
+    group_by(get(variable_group)) %>%
+    summarise(index = sample(1:number_cv, 1, replace = TRUE), .groups = "drop")
+
+  # Step 3: Left join indices back to the data
+  data_train <- data_train %>%
+    left_join(claims_indexes, by = set_names("index", variable_group))
+
+  # Step 4: Create the list of row indices for each fold
+  indexes <- list()
+  for (i in 1:number_cv) {
+    indexes[[i]] <- data_train %>%
+      filter(index == i) %>%
+      pull(rownum) # Extract row numbers
+  }
+
+  return(indexes)
+}
