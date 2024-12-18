@@ -1,29 +1,10 @@
-# Initialize list to store OOF predictions for valid sets
-oof_valid_predictions <- list()
+# Join data_train with predictions on rownum and rowIndex
+alignment_check <- data_train %>%
+  select(rownum) %>%
+  inner_join(mod_prob_auto_indemnity$pred, by = c("rownum" = "rowIndex"))
 
-# Loop over number of folds
-for (i in 1:number_cv) {
-  
-  # Get the validation indices for current fold
-  valid_indices <- valid_rows[[i]]$rownum
-  
-  # Debugging print
-  print(paste("Processing Resample", i))
-  print(paste("Validation Set Size:", length(valid_indices)))
-  
-  # Filter predictions for the current fold
-  fold_valid_preds <- mod_prob_auto_indemnity$pred %>%
-    filter(Resample == paste0("Resample", i) & rowIndex %in% valid_indices)
-  
-  # Debugging filtered predictions
-  print(paste("Number of Predictions Filtered in Resample", i, ":", nrow(fold_valid_preds)))
-  
-  # Store in the list
-  oof_valid_predictions[[i]] <- fold_valid_preds
-}
+# Check the number of matched rows
+print(nrow(alignment_check))
 
-# Combine all folds into a single dataframe
-oof_valid_predictions_final <- bind_rows(oof_valid_predictions)
-
-# View the final OOF predictions
-print(dim(oof_valid_predictions_final))
+# Compare to total rows in data_train
+print(nrow(data_train))
