@@ -1,22 +1,8 @@
-The R-squared (R²) value typically ranges from 0 to 1 (though it can also be negative in some cases, e.g., when the model is worse than a simple mean prediction). Here’s what different R² values indicate:
-
-Guidelines for Interpreting R²:
-	•	R² ≈ 1:
-	•	The model explains almost all the variability in the target variable. This is ideal but rare in real-world data, especially noisy data like claims or severity models.
-	•	R² ≈ 0.5 to 0.8:
-	•	A strong model for most practical purposes, especially in domains like insurance and regression tasks where data variability is often high.
-	•	R² ≈ 0.3 to 0.5:
-	•	The model explains some variability but may still miss important factors. Depending on the application, this could be acceptable, especially for noisy data.
-	•	R² < 0.3:
-	•	Weak explanatory power. This suggests the model needs improvement (e.g., better features, tuning, or addressing issues like data leakage).
-	•	R² ≈ 0 or negative:
-	•	The model fails to explain the variability in the data (or performs worse than simply predicting the mean). This is problematic and typically indicates a fundamental issue with the model or data.
-
-What R² Should Be for Your Severity Model?
-	•	Severity models in insurance often deal with highly skewed and noisy data. As a result:
-	•	R² between 0.3 and 0.7 is typically considered reasonable.
-	•	A lower R² can still be acceptable if the model demonstrates good performance on other metrics like MAE or RMSE, which directly reflect prediction accuracy.
-
-Focus on MAE and business relevance alongside R², as insurance severity models tend to prioritize the magnitude of prediction error over purely maximizing R².
-
-Let me know your R² value, and I can help evaluate its appropriateness further!
+# Visualize the results (e.g., actual vs predicted plot)
+library(ggplot2)
+ggplot(oof_predictions, aes(x = obs, y = pred)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values")
