@@ -1,8 +1,29 @@
-# Visualize the results (e.g., actual vs predicted plot)
-library(ggplot2)
-ggplot(oof_predictions, aes(x = obs, y = pred)) +
-  geom_point(alpha = 0.5) +
-  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
-  labs(title = "Actual vs Predicted Values",
-       x = "Actual Values",
-       y = "Predicted Values")
+# Step 1: Identify categorical columns in the dataset
+categorical_columns <- names(data_test)[sapply(data_test, is.factor) | sapply(data_test, is.character)]
+
+# Step 2: Loop through each categorical column
+for (col in categorical_columns) {
+  
+  # Get unique levels in the training and test datasets
+  train_levels <- unique(data_train_sev[[col]])
+  test_levels <- unique(data_test[[col]])
+  
+  # Identify levels in test data that are not in training data
+  new_levels <- setdiff(test_levels, train_levels)
+  
+  if (length(new_levels) > 0) {
+    # Replace new levels in the test dataset with the most frequent level from training
+    most_frequent_level <- names(sort(table(data_train_sev[[col]]), decreasing = TRUE))[1]
+    
+    # Replace the new levels in the test dataset
+    data_test[[col]] <- ifelse(data_test[[col]] %in% new_levels, 
+                               most_frequent_level, 
+                               data_test[[col]])
+    
+    cat(paste("Replaced new levels in column", col, "with", most_frequent_level, "\n"))
+  }
+}
+
+# Proceed with scoring or predictions
+data_test <- data_test %>%
+  mutate(oof_pred_sev_valid = predict(mod_sev_auto_indemnity, newdata = data_test))
