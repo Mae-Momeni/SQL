@@ -1,29 +1,16 @@
-# Step 1: Identify categorical columns in the dataset
-categorical_columns <- names(data_test)[sapply(data_test, is.factor) | sapply(data_test, is.character)]
+# Fix new levels for a specific column
+column_to_fix <- "GR_INTC_RISK_PROVINCE_CODE"
 
-# Step 2: Loop through each categorical column
-for (col in categorical_columns) {
-  
-  # Get unique levels in the training and test datasets
-  train_levels <- unique(data_train_sev[[col]])
-  test_levels <- unique(data_test[[col]])
-  
-  # Identify levels in test data that are not in training data
-  new_levels <- setdiff(test_levels, train_levels)
-  
-  if (length(new_levels) > 0) {
-    # Replace new levels in the test dataset with the most frequent level from training
-    most_frequent_level <- names(sort(table(data_train_sev[[col]]), decreasing = TRUE))[1]
-    
-    # Replace the new levels in the test dataset
-    data_test[[col]] <- ifelse(data_test[[col]] %in% new_levels, 
-                               most_frequent_level, 
-                               data_test[[col]])
-    
-    cat(paste("Replaced new levels in column", col, "with", most_frequent_level, "\n"))
-  }
-}
+# Get the most frequent level from training data
+most_frequent_level <- data_train_sev %>%
+  count(!!sym(column_to_fix), sort = TRUE) %>%
+  slice(1) %>%
+  pull(!!sym(column_to_fix))
 
-# Proceed with scoring or predictions
-data_test <- data_test %>%
-  mutate(oof_pred_sev_valid = predict(mod_sev_auto_indemnity, newdata = data_test))
+# Replace new levels in test data
+data_test[[column_to_fix]] <- as.character(data_test[[column_to_fix]])
+data_test[[column_to_fix]] <- ifelse(
+  data_test[[column_to_fix]] %in% unique(data_train_sev[[column_to_fix]]),
+  data_test[[column_to_fix]],
+  most_frequent_level
+)
