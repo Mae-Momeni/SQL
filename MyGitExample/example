@@ -1,16 +1,13 @@
-# Join oof_pred_sev_valid column from data_train_sev
-final_data <- data_train_prob %>%
+final_data_to_assess <- data_train_prob %>%
   left_join(data_train_sev %>% select(rownum, oof_pred_sev_valid), by = "rownum") %>%
+  rowwise() %>% # Enable row-wise operations
   mutate(
-    # Fill missing oof_pred_sev_valid values with pred_sev from data_train_prob_no_payment
     oof_pred_sev_valid = ifelse(
       is.na(oof_pred_sev_valid),
       data_train_prob_no_payment %>%
-        filter(rownum %in% rownum) %>%
+        filter(rownum == rownum) %>% # Use the row-wise context rownum
         pull(pred_sev),
       oof_pred_sev_valid
     )
-  )
-
-# View final dataset
-head(final_data)
+  ) %>%
+  ungroup() # Remove row-wise grouping afterward
