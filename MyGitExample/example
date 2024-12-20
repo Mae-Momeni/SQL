@@ -1,13 +1,14 @@
+# Preprocess `data_train_prob_no_payment` to create a mapping of rownum to pred_sev
+no_payment_mapping <- data_train_prob_no_payment %>%
+  select(rownum, pred_sev)
+
+# Efficient join and update for oof_pred_sev_valid
 final_data_to_assess <- data_train_prob %>%
   left_join(data_train_sev %>% select(rownum, oof_pred_sev_valid), by = "rownum") %>%
-  rowwise() %>% # Enable row-wise operations
   mutate(
     oof_pred_sev_valid = ifelse(
       is.na(oof_pred_sev_valid),
-      data_train_prob_no_payment %>%
-        filter(rownum == rownum) %>% # Use the row-wise context rownum
-        pull(pred_sev),
+      no_payment_mapping$pred_sev[match(rownum, no_payment_mapping$rownum)],
       oof_pred_sev_valid
     )
-  ) %>%
-  ungroup() # Remove row-wise grouping afterward
+  )
