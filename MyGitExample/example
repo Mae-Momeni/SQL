@@ -1,16 +1,16 @@
-# Fix new levels for a specific column
-column_to_fix <- "GR_INTC_RISK_PROVINCE_CODE"
+# Join oof_pred_sev_valid column from data_train_sev
+final_data <- data_train_prob %>%
+  left_join(data_train_sev %>% select(rownum, oof_pred_sev_valid), by = "rownum") %>%
+  mutate(
+    # Fill missing oof_pred_sev_valid values with pred_sev from data_train_prob_no_payment
+    oof_pred_sev_valid = ifelse(
+      is.na(oof_pred_sev_valid),
+      data_train_prob_no_payment %>%
+        filter(rownum %in% rownum) %>%
+        pull(pred_sev),
+      oof_pred_sev_valid
+    )
+  )
 
-# Get the most frequent level from training data
-most_frequent_level <- data_train_sev %>%
-  count(!!sym(column_to_fix), sort = TRUE) %>%
-  slice(1) %>%
-  pull(!!sym(column_to_fix))
-
-# Replace new levels in test data
-data_test[[column_to_fix]] <- as.character(data_test[[column_to_fix]])
-data_test[[column_to_fix]] <- ifelse(
-  data_test[[column_to_fix]] %in% unique(data_train_sev[[column_to_fix]]),
-  data_test[[column_to_fix]],
-  most_frequent_level
-)
+# View final dataset
+head(final_data)
