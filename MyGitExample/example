@@ -1,10 +1,1 @@
-ggplot(table, aes(x = `Cutoff Date`)) +
-  geom_line(aes(y = avg_left, color = lossyear), size = 1) +  # Include lossyear in the aesthetics
-  geom_line(aes(y = avg_pred, linetype = "Predicted", color = lossyear), size = 1) +  # Include lossyear here too
-  facet_wrap(~ lossyear) +  # Facet by lossyear
-  labs(
-    title = "Average Amount Left to Pay by Loss Year",
-    x = "Cutoff Date", 
-    y = "Average Predicted Value ($)"
-  ) +
-  theme_minimal()
+example
