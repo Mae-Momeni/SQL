@@ -1,17 +1,1 @@
-Weekly Update
-	1.	OOF Modeling and Development:
-	•	Developed and implemented cross-validation and out-of-fold (OOF) prediction frameworks for frequency and severity models, including result extraction, metric calculations, and confusion matrix generation.
-	•	Addressed blockers faced by Olivier, such as training code implementation and back-end logic understanding. Built the necessary codes, explained methodologies, and ensured clarity in their application.
-	•	Provided insights into reducing under-reserving issues through improved modeling methodologies and proposed feature engineering ideas, such as time-related economic indicators and long-tail claim flags.
-	2.	Mentorship and Collaboration:
-	•	Guided Olivier in interpreting OOF predictions and final results to enhance his understanding of data science workflows and statistical insights.
-	•	Reviewed and improved Olivier’s planned approach for model development, including training pipelines and methods for evaluating future data.
-	3.	Data Engineering and EDA Contributions:
-	•	Proposed and demonstrated the importance of drift studies and trend analysis for model predictability in future scenarios.
-	•	Collaborated with Laurence and Jake to explore features like family protection endorsements and loss province indicators for improving predictive signals.
-	4.	Technical and Process Improvements:
-	•	Migrated R packages to align with the latest development environment and cleaned up outdated datasets for efficient modeling workflows.
-	•	Built a health check mechanism within the training pipeline to validate indices and ensure robustness during model development.
-	5.	Insights and Observations:
-	•	Identified the impact of current imputation methods on model predictability and proposed alternatives to reduce bias while maintaining data integrity.
-	•	Highlighted the effect of including open reserve lines on claim payment probability and recommended addressing this in the modeling process.
+example
